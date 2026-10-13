@@ -1,0 +1,43 @@
+# ==============================================================================
+# VASHTRAM SERVER GITIGNORE
+# ==============================================================================
+
+# Dependencies
+node_modules/
+
+# Environment Variables & Secrets
+.env*
+!.env.example
+*.env*
+!*.env.example
+
+# Backups & Database Dumps
+backups/
+dumps/
+dump/
+*.bak
+*.backup
+*.dump
+*.sql
+backup-*.json
+
+# Archive Files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Uploads & Local Media
+uploads/
+
+# Logs & Temporary Files
+*.log
+*.tmp
+
+# Editor & OS Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

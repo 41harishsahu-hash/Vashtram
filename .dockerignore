@@ -1,0 +1,47 @@
+# ==============================================================================
+# VASHTRAM DOCKER IGNORE
+# ==============================================================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment Variables & Secrets
+.env*
+!.env.example
+*.env*
+!*.env.example
+
+# Backups & Database Dumps
+backups/
+*/backups/
+dumps/
+*/dumps/
+dump/
+*/dump/
+*.bak
+*.backup
+*.dump
+*.sql
+backup-*.json
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Uploads & Local Test Data
+uploads/
+*/uploads/
+server/uploads/
+
+# Build artifacts
+release/
+.git/
+.vscode/
+.idea/
+*.log
+*.tmp

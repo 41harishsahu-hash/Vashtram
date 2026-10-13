@@ -1,0 +1,43 @@
+# ==============================================================================
+# VASHTRAM VERCEL DEPLOYMENT IGNORE
+# Prevents backend code, database backups, archives, and secrets from uploading
+# ==============================================================================
+
+# Backend and Server code
+server/
+scripts/
+
+# Environment and Secrets
+.env*
+!.env.example
+*.env*
+!*.env.example
+
+# Backups and Dumps
+backups/
+*/backups/
+dumps/
+*/dumps/
+dump/
+*/dump/
+*.bak
+*.backup
+*.dump
+*.sql
+*.json.bak
+backup-*.json
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Uploads and temporary test media
+uploads/
+*/uploads/
+
+# Dependencies and source maps
+node_modules/
+*/node_modules/
+*.map

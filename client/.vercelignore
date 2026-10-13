@@ -1,0 +1,26 @@
+# Environment and Secrets
+.env*
+!.env.example
+*.env*
+!*.env.example
+
+# Backups and Dumps
+backups/
+dumps/
+dump/
+*.bak
+*.backup
+*.dump
+*.sql
+*.json.bak
+backup-*.json
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+
+# Dependencies and logs
+node_modules/
+*.log
+*.tmp

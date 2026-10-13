@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <rect width="600" height="400" fill="#F8F6F2"/>
+  <rect x="20" y="20" width="560" height="360" rx="12" fill="none" stroke="#E5DEC9" stroke-width="2" stroke-dasharray="8 6"/>
+  <g transform="translate(300, 180)" text-anchor="middle">
+    <!-- Premium textile / mattress protector product icon -->
+    <path d="M-36 -30 L36 -30 L48 10 L-48 10 Z" fill="#8B6239" opacity="0.15"/>
+    <path d="M-44 -10 L44 -10 L36 30 L-36 30 Z" fill="#8B6239" opacity="0.25"/>
+    <path d="M-30 10 L30 10 L24 40 L-24 40 Z" fill="#8B6239" opacity="0.4"/>
+    <circle cx="0" cy="-45" r="4" fill="#8B6239" opacity="0.6"/>
+    <!-- Brand Label -->
+    <text y="70" font-family="'Cinzel', 'Playfair Display', Georgia, serif" font-size="20" font-weight="600" letter-spacing="4" fill="#8B6239">VASHTRAM</text>
+    <text y="92" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="500" letter-spacing="1.5" fill="#A89A8A">LUXURY HOME TEXTILES</text>
+  </g>
+</svg>

@@ -1,0 +1,443 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   VASHTRAM DESIGN SYSTEM — LUXURY HOME TEXTILES & MATTRESS PROTECTORS
+   ========================================================================== */
+
+:root {
+  /* Fonts */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-heading: 'Cinzel', 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* LIGHT THEME TOKENS (Default) */
+  --bg-primary: #FAF9F5;       /* Warm luxury ivory/off-white */
+  --bg-secondary: #F3EFEA;     /* Soft warm linen */
+  --bg-card: #FFFFFF;          /* Pure crisp card surface */
+  --bg-hover: #F8F5F0;
+  --bg-input: #FFFFFF;
+  --header-bg: rgba(250, 249, 245, 0.92);
+
+  --text-primary: #1F1D1A;     /* Deep rich charcoal */
+  --text-secondary: #5C564D;   /* Refined warm neutral */
+  --text-muted: #8E887E;       /* Subtle muted tone */
+  --text-light: #FFFFFF;
+
+  --border-color: #E8E2D8;     /* Soft artisanal border */
+  --border-focus: #8B6239;
+
+  /* Brand Accents */
+  --accent-color: #8B6239;     /* Warm camel tan / brass */
+  --accent-hover: #724E2B;
+  --accent-light: #F4ECE1;
+  --accent-gold: #C5A880;
+
+  --badge-discount-bg: #8B6239;
+  --badge-discount-text: #FFFFFF;
+  --badge-success-bg: #E6F4EA;
+  --badge-success-text: #137333;
+  --badge-warning-bg: #FEF7E0;
+  --badge-warning-text: #B06000;
+  --badge-danger-bg: #FCE8E6;
+  --badge-danger-text: #C5221F;
+
+  --shadow-sm: 0 1px 3px rgba(31, 29, 26, 0.05);
+  --shadow-md: 0 4px 14px rgba(31, 29, 26, 0.08);
+  --shadow-lg: 0 10px 30px rgba(31, 29, 26, 0.1);
+  --shadow-card: 0 2px 10px rgba(31, 29, 26, 0.04);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* Layering & Z-Index System Hierarchy */
+  --z-normal: 1;               /* Standard page content */
+  --z-elevated: 10;            /* Cards, badges, elevated elements */
+  --z-sticky: 100;             /* Sticky headers / sub-bars */
+  --z-header: 1000;            /* Header / Main Navbar */
+  --z-navbar: 1000;            /* Navbar alias */
+  --z-whatsapp: 900;           /* Floating WhatsApp Action Button (below modals & headers) */
+  --z-dropdown: 2000;          /* Dropdowns, tooltips, flyouts */
+  --z-drawer: 3000;            /* Mobile navigation drawer, filter drawer */
+  --z-modal-backdrop: 40000;   /* Modal background scrim / overlay */
+  --z-modal: 50000;            /* Modals, popup dialogs, lightbox */
+  --z-toast: 99999;            /* Toast notifications, floating alerts */
+  --z-alert: 100000;           /* Confirmation dialogs, critical alerts */
+}
+
+/* DARK THEME TOKENS */
+html.dark,
+body.dark {
+  --bg-primary: #121316;       /* Deep obsidian slate */
+  --bg-secondary: #191B20;     /* Charcoal layer */
+  --bg-card: #20232B;          /* Elevated card surface */
+  --bg-hover: #272B35;
+  --bg-input: #181A20;
+  --header-bg: rgba(18, 19, 22, 0.92);
+
+  --text-primary: #F4F3F0;     /* Crisp warm white */
+  --text-secondary: #AEA99F;   /* Soft slate */
+  --text-muted: #7E7970;       /* Muted */
+  --text-light: #FFFFFF;
+
+  --border-color: #2E333F;     /* Slate border */
+  --border-focus: #C5A880;
+
+  /* Brand Accents Dark */
+  --accent-color: #C5A880;     /* Warm champagne gold */
+  --accent-hover: #D8BD96;
+  --accent-light: rgba(197, 168, 128, 0.15);
+  --accent-gold: #E5C396;
+
+  --badge-discount-bg: #C5A880;
+  --badge-discount-text: #121316;
+  --badge-success-bg: rgba(19, 115, 51, 0.25);
+  --badge-success-text: #81C995;
+  --badge-warning-bg: rgba(176, 96, 0, 0.25);
+  --badge-warning-text: #FDD663;
+  --badge-danger-bg: rgba(197, 34, 31, 0.25);
+  --badge-danger-text: #F28B82;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all var(--transition-fast);
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 16px; /* Minimum 16px prevents iOS Safari auto-zoom on touch */
+  color: var(--text-primary);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Strict enforcement on mobile devices */
+  }
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Typography Utility */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(12px, 3.5vw, 28px);
+}
+
+.container-fluid {
+  width: 100%;
+  padding-inline: clamp(12px, 3.5vw, 32px);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: var(--text-light);
+  box-shadow: 0 2px 8px rgba(139, 98, 57, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 98, 57, 0.35);
+}
+
+.btn-secondary {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--text-secondary);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--accent-light);
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-discount {
+  background-color: var(--badge-discount-bg);
+  color: var(--badge-discount-text);
+}
+
+.badge-success {
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
+}
+
+.badge-warning {
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+}
+
+.badge-danger {
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Responsive Base & Utilities */
+img, picture, svg, video {
+  max-width: 100%;
+}
+
+/* Global Fluid Product Grid */
+.responsive-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1100px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .responsive-product-grid {
+    gap: 10px;
+  }
+}
+
+/* Global Fluid Category Grid */
+.responsive-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .responsive-category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .responsive-category-grid {
+    gap: 8px !important;
+  }
+}
+
+/* Global Responsive Button Adaptivity */
+@media (max-width: 480px) {
+  .btn-mobile-full {
+    width: 100% !important;
+  }
+  .btn {
+    white-space: normal;
+  }
+}
+
+/* Toast Notifications Animation & Layering */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.vashtram-toast-alert {
+  z-index: var(--z-toast, 99999) !important;
+  bottom: 92px !important;
+}
+
+@media (max-width: 640px) {
+  .vashtram-toast-alert {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    max-width: none !important;
+    justify-content: space-between;
+  }
+}
+
+/* Mobile Responsive Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-responsive > table {
+  min-width: 680px;
+}
+
+/* Mobile Accessible Touch Targets */
+.touch-target-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

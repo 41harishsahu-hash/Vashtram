@@ -1,0 +1,36 @@
+{
+  "name": "vashtram-server",
+  "version": "1.0.0",
+  "description": "Backend REST API for VASHTRAM Mattress Protector E-Commerce",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch --watch-path=server.js --watch-path=.env --watch-path=config --watch-path=controllers --watch-path=middleware --watch-path=models --watch-path=routes --watch-path=utils server.js",
+    "kill-port": "node -e \"try { const out = require('child_process').execSync('netstat -ano | findstr :5000').toString(); out.split(/\\r?\\n/).filter(l => l.includes('LISTENING')).forEach(l => { const p = l.trim().split(/\\s+/).pop(); console.log('Killed port 5000 process PID ' + p); require('child_process').execSync('taskkill /F /PID ' + p); }); } catch { console.log('Port 5000 is clean'); }\"",
+    "seed": "node utils/seeder.js",
+    "sync-atlas": "node utils/syncLocalToAtlas.js",
+    "cleanup:demo": "node utils/cleanupDemoAccounts.js",
+    "verify:no-demo-accounts": "node utils/verifyNoDemoAccounts.js",
+    "migrate:indexes": "node utils/migrations/001_fix_razorpay_indexes.js",
+    "migrate:intents": "node utils/migrations/002_backfill_intent_payment_ids.js",
+    "verify:indexes": "node utils/verifyIndexes.js",
+    "test": "node utils/comprehensive_test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0"
+  }
+}
