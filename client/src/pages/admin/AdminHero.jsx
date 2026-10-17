@@ -28,6 +28,7 @@ const AdminHero = () => {
   const [fetching, setFetching] = useState(true);
   const [savingText, setSavingText] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savingImage, setSavingImage] = useState(false);
 
   // Original and Working Text Form State
   const [textForm, setTextForm] = useState({
@@ -204,7 +205,7 @@ const AdminHero = () => {
         }
       }
     } catch (err) {
-      showToast(err.message || 'Image upload failed', 'error');
+      showToast(err.response?.data?.message || err.message || 'Image upload failed', 'error');
     } finally {
       setUploadingImage(false);
     }
@@ -245,10 +246,9 @@ const AdminHero = () => {
   };
 
   const openEditModal = (img) => {
-    setSelectedImage(img);
     setEditImageForm({
       _id: img._id,
-      url: img.url,
+      url: img.url || '',
       altText: img.altText || '',
       isActive: img.isActive !== false,
       order: img.order || 1,
@@ -258,20 +258,26 @@ const AdminHero = () => {
 
   const handleEditImageSubmit = async (e) => {
     e.preventDefault();
-    if (!editImageForm.url.trim()) {
+    if (!editImageForm.url || !editImageForm.url.trim()) {
       showToast('Image URL cannot be empty', 'warning');
       return;
     }
 
+    setSavingImage(true);
     try {
       const res = await api.put(`/hero/images/${editImageForm._id}`, editImageForm);
       if (res.data?.success && res.data?.hero) {
         showToast('Hero image updated successfully!');
-        setImages(res.data.hero.images || []);
+        const sortedImages = (res.data.hero.images || []).sort(
+          (a, b) => (a.order || 0) - (b.order || 0)
+        );
+        setImages(sortedImages);
         setIsEditModalOpen(false);
       }
     } catch (err) {
-      showToast(err.message || 'Failed to update hero image', 'error');
+      showToast(err.response?.data?.message || err.message || 'Failed to update hero image', 'error');
+    } finally {
+      setSavingImage(false);
     }
   };
 
@@ -1265,7 +1271,11 @@ const AdminHero = () => {
             zIndex: 'var(--z-modal, 50000)',
             padding: '20px',
           }}
-          onClick={() => setIsEditModalOpen(false)}
+          onClick={() => {
+            if (!savingImage && !uploadingImage) {
+              setIsEditModalOpen(false);
+            }
+          }}
         >
           <div
             style={{
@@ -1285,6 +1295,7 @@ const AdminHero = () => {
               <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Edit / Replace Slide</h3>
               <button
                 type="button"
+                disabled={savingImage || uploadingImage}
                 onClick={() => setIsEditModalOpen(false)}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
               >
@@ -1302,12 +1313,17 @@ const AdminHero = () => {
                   type="file"
                   ref={replaceFileInputRef}
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => handleFileUpload(e.target.files[0], 'replace')}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileUpload(e.target.files[0], 'replace');
+                    }
+                    e.target.value = '';
+                  }}
                   style={{ display: 'none' }}
                 />
                 <button
                   type="button"
-                  disabled={uploadingImage}
+                  disabled={uploadingImage || savingImage}
                   onClick={() => replaceFileInputRef.current?.click()}
                   className="btn btn-secondary btn-full"
                   style={{ borderStyle: 'dashed', padding: '14px' }}
@@ -1394,11 +1410,20 @@ const AdminHero = () => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <button type="button" onClick={() => setIsEditModalOpen(false)} className="btn btn-secondary">
+                <button
+                  type="button"
+                  disabled={savingImage || uploadingImage}
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="btn btn-secondary"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={uploadingImage || !editImageForm.url} className="btn btn-primary">
-                  Save Changes
+                <button
+                  type="submit"
+                  disabled={uploadingImage || savingImage || !editImageForm.url}
+                  className="btn btn-primary"
+                >
+                  {savingImage ? 'Saving Changes...' : 'Save Changes'}
                 </button>
               </div>
             </form>

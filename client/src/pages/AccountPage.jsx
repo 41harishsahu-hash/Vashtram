@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useCart } from '../context/useCart';
-import { Package, LogOut, AlertCircle, Lock } from 'lucide-react';
+import { Package, LogOut, AlertCircle, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   validateAccountForm,
@@ -29,6 +29,19 @@ const AccountPage = () => {
     newPassword: '',
     confirmPassword: '',
   });
+
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+  const togglePasswordVisibility = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -160,6 +173,7 @@ const AccountPage = () => {
 
       await updateProfile(payload);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setShowPassword({ currentPassword: false, newPassword: false, confirmPassword: false });
       setErrors({});
       showToast(
         passwordData.newPassword
@@ -603,67 +617,177 @@ const AccountPage = () => {
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
                     Current Password
                   </label>
-                  <input
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                    }
-                    placeholder="Enter current password"
-                    autoComplete="current-password"
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword.currentPassword ? 'text' : 'password'}
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                      }
+                      placeholder="Enter current password"
+                      autoComplete="current-password"
+                      style={{ paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('currentPassword')}
+                      aria-label={showPassword.currentPassword ? 'Hide Current Password' : 'Show Current Password'}
+                      title={showPassword.currentPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        borderRadius: 'var(--radius-sm, 4px)',
+                        transition: 'color var(--transition-fast)',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    >
+                      {showPassword.currentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
                     New Password
                   </label>
-                  <input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, newPassword: e.target.value })
-                    }
-                    placeholder="Min. 8 characters (letters & numbers)"
-                    autoComplete="new-password"
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword.newPassword ? 'text' : 'password'}
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                      }
+                      placeholder="Min. 8 characters (letters & numbers)"
+                      autoComplete="new-password"
+                      style={{ paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('newPassword')}
+                      aria-label={showPassword.newPassword ? 'Hide New Password' : 'Show New Password'}
+                      title={showPassword.newPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        borderRadius: 'var(--radius-sm, 4px)',
+                        transition: 'color var(--transition-fast)',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    >
+                      {showPassword.newPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
                     Confirm New Password
                   </label>
-                  <input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                    }
-                    placeholder="Repeat new password"
-                    autoComplete="new-password"
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword.confirmPassword ? 'text' : 'password'}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                      }
+                      placeholder="Repeat new password"
+                      autoComplete="new-password"
+                      style={{ paddingRight: '40px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('confirmPassword')}
+                      aria-label={showPassword.confirmPassword ? 'Hide Confirm New Password' : 'Show Confirm New Password'}
+                      title={showPassword.confirmPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        borderRadius: 'var(--radius-sm, 4px)',
+                        transition: 'color var(--transition-fast)',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    >
+                      {showPassword.confirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            {/* Action Row */}
+            <div
+              className="account-form-actions"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '16px',
+                marginTop: '32px',
+                paddingTop: '24px',
+                borderTop: '1px solid var(--border-color)',
+              }}
+            >
               <button type="submit" disabled={saving} className="btn btn-primary">
                 {saving ? 'Saving Changes...' : 'Save Profile & Settings'}
               </button>
 
               <button
                 type="button"
+                className="account-signout-btn"
                 onClick={() => {
                   logout();
                   if (showToast) showToast('Signed out from all devices');
                 }}
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
                   color: '#C5221F',
                   fontSize: '0.88rem',
+                  fontWeight: 500,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  transition: 'background-color var(--transition-fast)',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(197, 34, 31, 0.08)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <LogOut size={16} /> Sign Out
               </button>
@@ -676,6 +800,19 @@ const AccountPage = () => {
         @media (max-width: 640px) {
           .account-form-grid, .account-form-grid-3 {
             grid-template-columns: 1fr !important;
+          }
+          .account-form-actions {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .account-form-actions .btn-primary {
+            width: 100%;
+            justify-content: center;
+          }
+          .account-form-actions .account-signout-btn {
+            justify-content: center;
+            width: 100%;
           }
         }
       `}</style>

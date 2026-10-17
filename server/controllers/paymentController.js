@@ -12,6 +12,54 @@ const {
 const { refundPayment } = require('../services/refundService');
 
 /**
+ * Practical RFC 5321/5322 email validation (max 254 chars, no consecutive dots, valid TLD)
+ */
+const isValidEmailAddress = (email) => {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  if (trimmed.length === 0 || trimmed.length > 254) return false;
+  if (/\s/.test(trimmed)) return false;
+  if (trimmed.includes('..')) return false;
+
+  const atIndex = trimmed.indexOf('@');
+  const lastAtIndex = trimmed.lastIndexOf('@');
+  if (atIndex <= 0 || atIndex !== lastAtIndex || atIndex === trimmed.length - 1) {
+    return false;
+  }
+
+  const localPart = trimmed.slice(0, atIndex);
+  const domainPart = trimmed.slice(atIndex + 1);
+
+  if (localPart.length > 64 || localPart.startsWith('.') || localPart.endsWith('.')) {
+    return false;
+  }
+  if (!/^[a-zA-Z0-9._%+-]+$/.test(localPart)) {
+    return false;
+  }
+
+  if (domainPart.length > 253 || domainPart.startsWith('.') || domainPart.endsWith('.') || domainPart.startsWith('-') || domainPart.endsWith('-')) {
+    return false;
+  }
+  const domainLabels = domainPart.split('.');
+  if (domainLabels.length < 2) {
+    return false;
+  }
+
+  for (const label of domainLabels) {
+    if (!label || label.length > 63) return false;
+    if (label.startsWith('-') || label.endsWith('-')) return false;
+    if (!/^[a-zA-Z0-9-]+$/.test(label)) return false;
+  }
+
+  const tld = domainLabels[domainLabels.length - 1];
+  if (!/^[a-zA-Z]{2,}$/.test(tld)) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Validates shipping address fields
  */
 const validateShippingAddress = (shippingAddress) => {
@@ -23,47 +71,120 @@ const validateShippingAddress = (shippingAddress) => {
 
   const { fullName, mobileNumber, email, address, city, state, pincode } = shippingAddress;
 
-  if (!fullName || fullName.trim().length < 2 || fullName.trim().length > 60) {
-    const error = new Error('Please provide a valid full name (2-60 characters)');
+  // 1. Full Name: 2-60 chars, letters, spaces, apostrophes, periods, hyphens
+  const trimmedName = typeof fullName === 'string' ? fullName.trim() : '';
+  if (
+    !trimmedName ||
+    trimmedName.length < 2 ||
+    trimmedName.length > 60 ||
+    !/^[a-zA-Z\s.'-]+$/.test(trimmedName) ||
+    !/[a-zA-Z]/.test(trimmedName)
+  ) {
+    const error = new Error('Name must be 2–60 characters and contain a valid name.');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!mobileNumber || !/^[6-9]\d{9}$/.test(mobileNumber.trim())) {
+  // Mobile number (untouched)
+  if (!mobileNumber || !/^[6-9]\d{9}$/.test(typeof mobileNumber === 'string' ? mobileNumber.trim() : '')) {
     const error = new Error('Please provide a valid 10-digit Indian mobile number starting with 6-9');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!email || !/^\S+@\S+\.\S+$/.test(email.trim())) {
-    const error = new Error('Please provide a valid email address');
+  // 2. Email Address: max 254 chars, practical format, no consecutive dots
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+  if (!trimmedEmail || trimmedEmail.length > 254 || !isValidEmailAddress(trimmedEmail)) {
+    const error = new Error('Please enter a valid email address (maximum 254 characters).');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!address || address.trim().length < 5 || address.trim().length > 250) {
-    const error = new Error('Please provide a complete delivery address (5-250 characters)');
+  // 3. Street Address: 5-200 chars, letters, numbers, spaces, commas, periods, hyphens, slashes, apostrophes, #
+  const trimmedAddress = typeof address === 'string' ? address.trim() : '';
+  const alphanumericCount = (trimmedAddress.match(/[a-zA-Z0-9]/g) || []).length;
+  if (
+    !trimmedAddress ||
+    trimmedAddress.length < 5 ||
+    trimmedAddress.length > 200 ||
+    !/^[a-zA-Z0-9\s,.'#/\-:&()]+$/.test(trimmedAddress) ||
+    alphanumericCount < 3
+  ) {
+    const error = new Error('Address must be 5–200 characters.');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!city || city.trim().length < 2) {
-    const error = new Error('Please provide a valid city');
+  // 4. City: 2-60 chars, letters, spaces, periods, apostrophes, hyphens
+  const trimmedCity = typeof city === 'string' ? city.trim() : '';
+  if (
+    !trimmedCity ||
+    trimmedCity.length < 2 ||
+    trimmedCity.length > 60 ||
+    !/^[a-zA-Z\s.'-]+$/.test(trimmedCity) ||
+    !/[a-zA-Z]/.test(trimmedCity)
+  ) {
+    const error = new Error('City must be 2–60 characters and contain a valid city name.');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!state || state.trim().length < 2) {
-    const error = new Error('Please provide a valid state');
+  // 5. State: 2-60 chars, letters, spaces, periods, hyphens
+  const trimmedState = typeof state === 'string' ? state.trim() : '';
+  if (
+    !trimmedState ||
+    trimmedState.length < 2 ||
+    trimmedState.length > 60 ||
+    !/^[a-zA-Z\s.-]+$/.test(trimmedState) ||
+    !/[a-zA-Z]/.test(trimmedState)
+  ) {
+    const error = new Error('State must be 2–60 characters and contain a valid state name.');
     error.statusCode = 400;
     throw error;
   }
 
-  if (!pincode || !/^\d{6}$/.test(pincode.trim())) {
+  // Pincode (untouched)
+  if (!pincode || !/^\d{6}$/.test(typeof pincode === 'string' ? pincode.trim() : '')) {
     const error = new Error('Please provide a valid 6-digit postal pincode');
     error.statusCode = 400;
     throw error;
   }
+};
+
+/**
+ * Validates optional delivery instructions (notes): max 250 chars, allows letters, numbers, spaces, and normal punctuation
+ */
+const validateDeliveryNotes = (notes) => {
+  if (notes === undefined || notes === null) {
+    return '';
+  }
+  if (typeof notes !== 'string') {
+    const error = new Error('Please enter valid delivery instructions or leave this field empty.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const trimmed = notes.trim();
+  if (trimmed.length === 0) {
+    return '';
+  }
+  if (trimmed.length > 250) {
+    const error = new Error('Delivery instructions must not exceed 250 characters.');
+    error.statusCode = 400;
+    throw error;
+  }
+  // Must contain alphanumeric characters (reject values containing only meaningless punctuation)
+  if (!/[a-zA-Z0-9]/.test(trimmed)) {
+    const error = new Error('Please enter valid delivery instructions or leave this field empty.');
+    error.statusCode = 400;
+    throw error;
+  }
+  // Allow letters, numbers, spaces, and ordinary punctuation
+  if (!/^[a-zA-Z0-9\s,.'#/\-:&()!?"+@;%*_]+$/.test(trimmed)) {
+    const error = new Error('Please enter valid delivery instructions or leave this field empty.');
+    error.statusCode = 400;
+    throw error;
+  }
+  return trimmed;
 };
 
 /**
@@ -375,6 +496,7 @@ const createRazorpayOrder = async (req, res, next) => {
       throw error;
     }
     validateShippingAddress(shippingAddress);
+    const validatedNotes = validateDeliveryNotes(notes);
 
     const validatedAddress = {
       fullName: shippingAddress.fullName.trim(),
@@ -462,7 +584,7 @@ const createRazorpayOrder = async (req, res, next) => {
         expectedAmount: amountInPaise,
         currency: 'INR',
         status: 'created',
-        notes: (notes || '').slice(0, 500),
+        notes: validatedNotes,
       },
       { upsert: true, new: true }
     );
@@ -1473,6 +1595,7 @@ module.exports = {
   calculateOrderPricing,
   aggregateOrderItems,
   validateShippingAddress,
+  validateDeliveryNotes,
   processRazorpayRefund,
   getRazorpayInstance,
 };

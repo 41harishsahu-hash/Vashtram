@@ -8,6 +8,14 @@ import { loadRazorpayScript } from '../utils/loadRazorpay';
 import { pollPaymentStatusWorkflow } from '../utils/paymentPolling';
 import useBodyScrollLock from '../utils/useBodyScrollLock';
 import { Lock, CreditCard, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import {
+  isValidFullName,
+  isValidEmailAddress,
+  isValidStreetAddress,
+  isValidState,
+  isValidCity,
+  isValidDeliveryNotes,
+} from '../utils/validationHelper';
 
 const CheckoutPage = () => {
   const { cart, subtotal, shipping, total, clearCart, showToast, validateCartWithServer } = useCart();
@@ -154,46 +162,99 @@ const CheckoutPage = () => {
     return () => clearTimeout(timer);
   }, [user]);
 
-  const validate = () => {
-    const errs = {};
-    if (!formData.fullName || formData.fullName.trim().length < 2) {
-      errs.fullName = 'Full Name is required (minimum 2 characters)';
+  const validateField = (name, value) => {
+    const trimmed = typeof value === 'string' ? value.trim() : '';
+    switch (name) {
+      case 'fullName':
+        if (!trimmed || !isValidFullName(trimmed)) {
+          return 'Name must be 2–60 characters and contain a valid name.';
+        }
+        return null;
+      case 'email':
+        if (!trimmed || !isValidEmailAddress(trimmed)) {
+          return 'Please enter a valid email address (maximum 254 characters).';
+        }
+        return null;
+      case 'address':
+        if (!trimmed || !isValidStreetAddress(trimmed)) {
+          return 'Address must be 5–200 characters.';
+        }
+        return null;
+      case 'city':
+        if (!trimmed || !isValidCity(trimmed)) {
+          return 'City must be 2–60 characters and contain a valid city name.';
+        }
+        return null;
+      case 'state':
+        if (!trimmed || !isValidState(trimmed)) {
+          return 'State must be 2–60 characters and contain a valid state name.';
+        }
+        return null;
+      case 'mobileNumber':
+        if (!trimmed || !/^[6-9]\d{9}$/.test(trimmed)) {
+          return 'Enter a valid 10-digit Indian mobile number starting with 6-9';
+        }
+        return null;
+      case 'pincode':
+        if (!trimmed || !/^\d{6}$/.test(trimmed)) {
+          return 'Pincode must be exactly 6 digits';
+        }
+        return null;
+      case 'notes':
+        if (!trimmed) {
+          return null;
+        }
+        if (trimmed.length > 250) {
+          return 'Delivery instructions must not exceed 250 characters.';
+        }
+        if (!isValidDeliveryNotes(trimmed)) {
+          return 'Please enter valid delivery instructions or leave this field empty.';
+        }
+        return null;
+      default:
+        return null;
     }
+  };
 
-    if (!formData.mobileNumber || !/^[6-9]\d{9}$/.test(formData.mobileNumber.trim())) {
-      errs.mobileNumber = 'Enter a valid 10-digit Indian mobile number starting with 6-9';
-    }
-
-    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
-      errs.email = 'Enter a valid email address';
-    }
-
-    if (!formData.address || formData.address.trim().length < 6) {
-      errs.address = 'Detailed delivery address is required (at least 6 characters)';
-    }
-
-    if (!formData.city || formData.city.trim().length < 2) {
-      errs.city = 'City is required';
-    }
-
-    if (!formData.state || formData.state.trim().length < 2) {
-      errs.state = 'State is required';
-    }
-
-    if (!formData.pincode || !/^\d{6}$/.test(formData.pincode.trim())) {
-      errs.pincode = 'Pincode must be exactly 6 digits';
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
+      const error = validateField(name, value);
+      if (!error) {
+        setErrors((prev) => ({ ...prev, [name]: null }));
+      }
     }
+  };
+
+  const validate = () => {
+    const errs = {};
+    const fieldOrder = ['fullName', 'mobileNumber', 'email', 'address', 'city', 'state', 'pincode', 'notes'];
+    for (const field of fieldOrder) {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        errs[field] = error;
+      }
+    }
+
+    setErrors(errs);
+
+    const firstInvalid = fieldOrder.find((field) => errs[field]);
+    if (firstInvalid) {
+      const el = document.querySelector(`[name="${firstInvalid}"]`);
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    return Object.keys(errs).length === 0;
   };
 
   const handlePlaceOrder = async (e) => {
@@ -564,8 +625,11 @@ const CheckoutPage = () => {
                     type="text"
                     name="fullName"
                     placeholder="e.g. Rohan Sharma"
+                    maxLength={60}
+                    minLength={2}
                     value={formData.fullName}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     style={{ borderColor: errors.fullName ? '#C5221F' : 'var(--border-color)' }}
                   />
                   {errors.fullName && (
@@ -588,6 +652,7 @@ const CheckoutPage = () => {
                       maxLength={10}
                       value={formData.mobileNumber}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       style={{ borderColor: errors.mobileNumber ? '#C5221F' : 'var(--border-color)' }}
                     />
                     {errors.mobileNumber && (
@@ -605,8 +670,10 @@ const CheckoutPage = () => {
                       type="email"
                       name="email"
                       placeholder="e.g. rohan@example.com"
+                      maxLength={254}
                       value={formData.email}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       style={{ borderColor: errors.email ? '#C5221F' : 'var(--border-color)' }}
                     />
                     {errors.email && (
@@ -626,8 +693,11 @@ const CheckoutPage = () => {
                     rows={3}
                     name="address"
                     placeholder="Enter complete building name, flat number, street and landmark"
+                    maxLength={200}
+                    minLength={5}
                     value={formData.address}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     style={{ borderColor: errors.address ? '#C5221F' : 'var(--border-color)' }}
                   />
                   {errors.address && (
@@ -647,8 +717,11 @@ const CheckoutPage = () => {
                       type="text"
                       name="city"
                       placeholder="e.g. City"
+                      maxLength={60}
+                      minLength={2}
                       value={formData.city}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       style={{ borderColor: errors.city ? '#C5221F' : 'var(--border-color)' }}
                     />
                     {errors.city && (
@@ -666,8 +739,11 @@ const CheckoutPage = () => {
                       type="text"
                       name="state"
                       placeholder="e.g. State"
+                      maxLength={60}
+                      minLength={2}
                       value={formData.state}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       style={{ borderColor: errors.state ? '#C5221F' : 'var(--border-color)' }}
                     />
                     {errors.state && (
@@ -688,6 +764,7 @@ const CheckoutPage = () => {
                       maxLength={6}
                       value={formData.pincode}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       style={{ borderColor: errors.pincode ? '#C5221F' : 'var(--border-color)' }}
                     />
                     {errors.pincode && (
@@ -707,9 +784,17 @@ const CheckoutPage = () => {
                     type="text"
                     name="notes"
                     placeholder="e.g. Leave with security / Ring bell twice"
+                    maxLength={250}
                     value={formData.notes}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    style={{ borderColor: errors.notes ? '#C5221F' : 'var(--border-color)' }}
                   />
+                  {errors.notes && (
+                    <span style={{ color: '#C5221F', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                      {errors.notes}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

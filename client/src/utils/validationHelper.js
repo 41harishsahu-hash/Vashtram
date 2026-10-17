@@ -7,11 +7,123 @@ export const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
 export const PINCODE_REGEX = /^\d{6}$/;
 
 /**
+ * Validates full name: 2-60 chars, letters, spaces, apostrophes, periods, hyphens
+ */
+export const isValidFullName = (name) => {
+  if (!name || typeof name !== 'string') return false;
+  const trimmed = name.trim();
+  if (trimmed.length < 2 || trimmed.length > 60) return false;
+  if (!/^[a-zA-Z\s.'-]+$/.test(trimmed)) return false;
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+  return true;
+};
+
+/**
+ * Validates email address format with practical RFC 5321/5322 rules (max 254 chars, no consecutive dots)
+ */
+export const isValidEmailAddress = (email) => {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  if (trimmed.length === 0 || trimmed.length > 254) return false;
+  if (/\s/.test(trimmed)) return false;
+  if (trimmed.includes('..')) return false;
+
+  const atIndex = trimmed.indexOf('@');
+  const lastAtIndex = trimmed.lastIndexOf('@');
+  if (atIndex <= 0 || atIndex !== lastAtIndex || atIndex === trimmed.length - 1) {
+    return false;
+  }
+
+  const localPart = trimmed.slice(0, atIndex);
+  const domainPart = trimmed.slice(atIndex + 1);
+
+  if (localPart.length > 64 || localPart.startsWith('.') || localPart.endsWith('.')) {
+    return false;
+  }
+  if (!/^[a-zA-Z0-9._%+-]+$/.test(localPart)) {
+    return false;
+  }
+
+  if (domainPart.length > 253 || domainPart.startsWith('.') || domainPart.endsWith('.') || domainPart.startsWith('-') || domainPart.endsWith('-')) {
+    return false;
+  }
+  const domainLabels = domainPart.split('.');
+  if (domainLabels.length < 2) {
+    return false;
+  }
+
+  for (const label of domainLabels) {
+    if (!label || label.length > 63) return false;
+    if (label.startsWith('-') || label.endsWith('-')) return false;
+    if (!/^[a-zA-Z0-9-]+$/.test(label)) return false;
+  }
+
+  const tld = domainLabels[domainLabels.length - 1];
+  if (!/^[a-zA-Z]{2,}$/.test(tld)) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Validates email address format
  */
 export const isValidEmail = (email) => {
-  if (!email || typeof email !== 'string') return false;
-  return EMAIL_REGEX.test(email.trim());
+  return isValidEmailAddress(email);
+};
+
+/**
+ * Validates street address: 5-200 chars, supports Indian addresses with letters, numbers,
+ * spaces, commas, periods, hyphens, slashes, apostrophes, #
+ */
+export const isValidStreetAddress = (address) => {
+  if (!address || typeof address !== 'string') return false;
+  const trimmed = address.trim();
+  if (trimmed.length < 5 || trimmed.length > 200) return false;
+  if (!/^[a-zA-Z0-9\s,.'#/\-:&()]+$/.test(trimmed)) return false;
+  const alphanumericCount = (trimmed.match(/[a-zA-Z0-9]/g) || []).length;
+  if (alphanumericCount < 3) return false;
+  return true;
+};
+
+/**
+ * Validates state: 2-60 chars, letters, spaces, periods, hyphens
+ */
+export const isValidState = (state) => {
+  if (!state || typeof state !== 'string') return false;
+  const trimmed = state.trim();
+  if (trimmed.length < 2 || trimmed.length > 60) return false;
+  if (!/^[a-zA-Z\s.-]+$/.test(trimmed)) return false;
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+  return true;
+};
+
+/**
+ * Validates city: 2-60 chars, letters, spaces, periods, apostrophes, hyphens
+ */
+export const isValidCity = (city) => {
+  if (!city || typeof city !== 'string') return false;
+  const trimmed = city.trim();
+  if (trimmed.length < 2 || trimmed.length > 60) return false;
+  if (!/^[a-zA-Z\s.'-]+$/.test(trimmed)) return false;
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+  return true;
+};
+
+/**
+ * Validates optional special delivery instructions: max 250 chars, letters, numbers,
+ * spaces, and normal punctuation. Must contain alphanumeric content if provided.
+ */
+export const isValidDeliveryNotes = (notes) => {
+  if (notes === undefined || notes === null) return true;
+  if (typeof notes !== 'string') return false;
+  const trimmed = notes.trim();
+  if (trimmed.length === 0) return true;
+  if (trimmed.length > 250) return false;
+  if (!/[a-zA-Z0-9]/.test(trimmed)) return false;
+  if (!/^[a-zA-Z0-9\s,.'#/\-:&()!?"+@;%*_]+$/.test(trimmed)) return false;
+  return true;
 };
 
 /**
