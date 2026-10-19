@@ -860,8 +860,8 @@ const ProductDetailsPage = () => {
                 {isOutOfStock
                   ? 'Currently Out of Stock'
                   : stock <= 5
-                  ? `Hurry, only ${stock} items left in stock!`
-                  : 'In Stock & Ready to Dispatch'}
+                    ? `Hurry, only ${stock} items left in stock!`
+                    : 'In Stock & Ready to Dispatch'}
               </span>
             </div>
 
@@ -1076,7 +1076,7 @@ const ProductDetailsPage = () => {
                     </tr>
                     <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '10px 0', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        Pillow Covers Included
+                        Pillow Covers Not Included
                       </td>
                       <td style={{ padding: '10px 0', color: 'var(--text-secondary)' }}>{pillowCovers}</td>
                     </tr>

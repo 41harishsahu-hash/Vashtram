@@ -6,7 +6,7 @@ const ValueProps = () => {
     {
       icon: <Award size={22} style={{ color: 'var(--accent-color)' }} />,
       title: 'Premium Quality',
-      subtitle: '100% Pure Combed Cotton',
+      subtitle: '100% Waterproof',
     },
     {
       icon: <Truck size={22} style={{ color: 'var(--accent-color)' }} />,

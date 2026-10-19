@@ -50,7 +50,7 @@ const AdminProducts = () => {
     sku: '',
     threadCount: 300,
     dimensions: '108 x 108 inches',
-    pillowCovers: '2 Pillow Covers (18 x 28 inches)',
+    pillowCovers: 'Pillow Covers Not Included.',
     careInstructions: 'Machine wash cold on gentle cycle. Line dry in shade.',
     isFeatured: false,
     isActive: true,
@@ -868,673 +868,673 @@ const AdminProducts = () => {
                 }}
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                    Product Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. VASHTRAM Waterproof Mattress Protector King"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                    Description *
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="Detailed craftsmanship, fabric softness and styling description..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Category *
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      required
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((c) => (
-                        <option key={c._id} value={c._id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Original Price (₹) *
+                      Product Title *
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       required
-                      min={0}
-                      placeholder="e.g. 2499"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="e.g. VASHTRAM Waterproof Mattress Protector King"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Discount Price (₹)
+                      Description *
                     </label>
-                    <input
-                      type="number"
-                      min={0}
-                      placeholder="e.g. 1499 (optional)"
-                      value={formData.discountPrice}
-                      onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
-                      style={
-                        formData.discountPrice &&
-                          formData.price &&
-                          Number(formData.discountPrice) > Number(formData.price)
-                          ? { borderColor: '#d93025' }
-                          : {}
-                      }
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="Detailed craftsmanship, fabric softness and styling description..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
-                    {formData.discountPrice &&
-                      formData.price &&
-                      Number(formData.discountPrice) > Number(formData.price) ? (
-                      <span style={{ color: '#d93025', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
-                        Discount price cannot exceed the original price (₹{Number(formData.price).toLocaleString('en-IN')})
-                      </span>
-                    ) : (
-                      formData.sizes && formData.sizes.length > 0 && (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '4px', display: 'block' }}>
-                          Optional when size variants have individual prices (individual size prices take precedence on storefront)
-                        </span>
-                      )
-                    )}
                   </div>
-                </div>
 
-                {/* Dedicated Multiple Size Options Section */}
-                <div
-                  style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '10px',
-                    }}
-                  >
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label
-                        style={{
-                          display: 'block',
-                          fontSize: '0.92rem',
-                          fontWeight: 700,
-                          color: 'var(--text-primary)',
-                          margin: 0,
-                        }}
-                      >
-                        Multiple Size Options & Individual Prices *
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Category *
                       </label>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Every product supports multiple size options. Each option must have a Numerical Measurement, Size Name, and Individual Price.
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        onClick={handleLoadPresetSizes}
-                        className="btn btn-secondary btn-sm"
-                        style={{ fontSize: '0.75rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        title="Load 8 common sizes: 48×75 Double, 60×75 Queen, 72×72 King, etc."
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        required
                       >
-                        ⚡ Load Size Preset
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleAddSizeOption}
-                        className="btn btn-primary btn-sm"
-                        style={{ fontSize: '0.75rem', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        <Plus size={14} /> Add Size Option
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Size Options Table */}
-                  <div
-                    style={{
-                      backgroundColor: 'var(--bg-card)',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border-color)',
-                      overflowX: 'auto',
-                    }}
-                  >
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', backgroundColor: 'rgba(0,0,0,0.03)' }}>
-                          <th style={{ padding: '8px 12px', fontWeight: 600, width: '32%' }}>1. Numerical Measurement</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 600, width: '32%' }}>2. Size Name</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 600, width: '24%' }}>3. Individual Price (₹) *</th>
-                          <th style={{ padding: '8px 12px', fontWeight: 600, textAlign: 'center', width: '12%' }}>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(formData.sizes || []).map((s, idx) => (
-                          <tr key={idx} style={{ borderBottom: idx < (formData.sizes || []).length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                            {/* 1. Numerical Measurement */}
-                            <td style={{ padding: '8px 12px' }}>
-                              <input
-                                type="text"
-                                placeholder="e.g. 48×75, 60×75, 72×72"
-                                value={s.measurement || ''}
-                                onChange={(e) => handleSizeOptionChange(idx, 'measurement', e.target.value)}
-                                style={{ fontSize: '0.82rem', padding: '6px 10px', width: '100%' }}
-                              />
-                            </td>
-
-                            {/* 2. Size Name */}
-                            <td style={{ padding: '8px 12px' }}>
-                              <input
-                                type="text"
-                                placeholder="e.g. Double, Queen, King, Free Size"
-                                value={s.name || ''}
-                                required
-                                onChange={(e) => handleSizeOptionChange(idx, 'name', e.target.value)}
-                                style={{ fontSize: '0.82rem', padding: '6px 10px', width: '100%' }}
-                                list="size-presets"
-                              />
-                            </td>
-
-                            {/* 3. Individual Price */}
-                            <td style={{ padding: '8px 12px' }}>
-                              <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>₹</span>
-                                <input
-                                  type="number"
-                                  placeholder="e.g. 344"
-                                  min={0}
-                                  required
-                                  value={s.price}
-                                  onChange={(e) => handleSizeOptionChange(idx, 'price', e.target.value)}
-                                  style={{ fontSize: '0.82rem', padding: '6px 10px 6px 20px', width: '100%' }}
-                                />
-                              </div>
-                            </td>
-
-                            {/* Action / Delete */}
-                            <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSizeOption(idx)}
-                                disabled={(formData.sizes || []).length <= 1}
-                                title={(formData.sizes || []).length <= 1 ? 'Product must have at least one size option' : 'Delete this size option'}
-                                style={{
-                                  border: 'none',
-                                  background: 'none',
-                                  color: (formData.sizes || []).length <= 1 ? 'var(--text-muted)' : '#C5221F',
-                                  cursor: (formData.sizes || []).length <= 1 ? 'not-allowed' : 'pointer',
-                                  opacity: (formData.sizes || []).length <= 1 ? 0.3 : 1,
-                                  padding: '4px',
-                                }}
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </td>
-                          </tr>
+                        <option value="">Select Category</option>
+                        {categories.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            {c.name}
+                          </option>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <datalist id="size-presets">
-                    <option value="King" />
-                    <option value="Queen" />
-                    <option value="Double" />
-                    <option value="Single" />
-                    <option value="Free Size" />
-                  </datalist>
-
-                  {/* Size Preview / Summary Pills */}
-                  {(formData.sizes || []).length > 0 && (
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                        Size Summary ({(formData.sizes || []).length} Options):
-                      </span>
-                      {(formData.sizes || []).map((s, idx) => (
-                        <span
-                          key={idx}
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '2px 8px',
-                            backgroundColor: 'var(--bg-card)',
-                            borderRadius: '4px',
-                            border: '1px solid var(--border-color)',
-                            color: 'var(--text-primary)',
-                          }}
-                        >
-                          {s.measurement ? `${s.measurement} (${s.name})` : (s.name || 'Size')} : <strong>₹{s.price || 0}</strong>
-                        </span>
-                      ))}
+                      </select>
                     </div>
-                  )}
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Stock Quantity *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min={0}
-                      value={formData.stock}
-                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      SKU Code
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Auto or VST-XXX"
-                      value={formData.sku}
-                      onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Material
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.material}
-                      onChange={(e) => setFormData({ ...formData, material: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Pattern
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.pattern}
-                      onChange={(e) => setFormData({ ...formData, pattern: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                      Color
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Beige, Soft Blue"
-                      value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, margin: 0 }}>
-                        Product Images *
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Original Price (₹) *
                       </label>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Minimum: 2 images | Maximum: 4 images. Image 1 is the <strong>Primary Image</strong> shown across catalog and cards.
-                      </span>
+                      <input
+                        type="number"
+                        required
+                        min={0}
+                        placeholder="e.g. 2499"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      />
                     </div>
-                    <span
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Discount Price (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="e.g. 1499 (optional)"
+                        value={formData.discountPrice}
+                        onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                        style={
+                          formData.discountPrice &&
+                            formData.price &&
+                            Number(formData.discountPrice) > Number(formData.price)
+                            ? { borderColor: '#d93025' }
+                            : {}
+                        }
+                      />
+                      {formData.discountPrice &&
+                        formData.price &&
+                        Number(formData.discountPrice) > Number(formData.price) ? (
+                        <span style={{ color: '#d93025', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                          Discount price cannot exceed the original price (₹{Number(formData.price).toLocaleString('en-IN')})
+                        </span>
+                      ) : (
+                        formData.sizes && formData.sizes.length > 0 && (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '4px', display: 'block' }}>
+                            Optional when size variants have individual prices (individual size prices take precedence on storefront)
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dedicated Multiple Size Options Section */}
+                  <div
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
+                    <div
                       style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        padding: '3px 10px',
-                        borderRadius: '9999px',
-                        backgroundColor: (formData.images || []).length >= 2 && (formData.images || []).length <= 4 ? '#E6F4EA' : '#FCE8E6',
-                        color: (formData.images || []).length >= 2 && (formData.images || []).length <= 4 ? '#137333' : '#C5221F',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '10px',
                       }}
                     >
-                      {(formData.images || []).length} / 4 Images
-                    </span>
-                  </div>
-
-                  {/* Horizontal Image Slots Grid */}
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                      gap: '12px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    {(formData.images || []).map((imgUrl, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          border: idx === 0 ? '2px solid var(--accent-color, #8B6239)' : '1px solid var(--border-color)',
-                          borderRadius: '8px',
-                          padding: '10px',
-                          backgroundColor: idx === 0 ? 'rgba(139, 98, 57, 0.04)' : 'var(--bg-secondary)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '8px',
-                          boxShadow: idx === 0 ? '0 2px 8px rgba(139, 98, 57, 0.12)' : 'none',
-                        }}
-                      >
-                        {/* Header badge & delete */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span
-                            style={{
-                              fontSize: '0.72rem',
-                              fontWeight: 700,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.04em',
-                              color: idx === 0 ? '#8B6239' : 'var(--text-muted)',
-                              backgroundColor: idx === 0 ? '#F9F3EC' : 'var(--bg-card)',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              border: idx === 0 ? '1px solid #D7C4B2' : '1px solid var(--border-color)',
-                            }}
-                          >
-                            {idx === 0 ? '⭐ Primary' : `Image ${idx + 1}`}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSlot(idx)}
-                            disabled={(formData.images || []).length <= 2}
-                            title={(formData.images || []).length <= 2 ? 'Minimum 2 images required' : 'Remove image'}
-                            style={{
-                              border: 'none',
-                              background: 'none',
-                              color: (formData.images || []).length <= 2 ? 'var(--text-muted)' : '#C5221F',
-                              cursor: (formData.images || []).length <= 2 ? 'not-allowed' : 'pointer',
-                              padding: '2px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              opacity: (formData.images || []).length <= 2 ? 0.35 : 1,
-                            }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-
-                        {/* Image Preview Box */}
-                        <div
+                      <div>
+                        <label
                           style={{
-                            width: '100%',
-                            height: '110px',
-                            borderRadius: '6px',
-                            overflow: 'hidden',
-                            backgroundColor: '#1a1a1a',
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            display: 'block',
+                            fontSize: '0.92rem',
+                            fontWeight: 700,
+                            color: 'var(--text-primary)',
+                            margin: 0,
                           }}
                         >
-                          {uploadingSlot === idx ? (
-                            <div style={{ color: '#fff', fontSize: '0.75rem', textAlign: 'center', padding: '8px' }}>
-                              Uploading...
-                            </div>
-                          ) : imgUrl ? (
-                            <img
-                              src={imgUrl}
-                              alt={`Product Image ${idx + 1}`}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={(e) => {
-                                e.target.style.opacity = 0.3;
-                              }}
-                            />
-                          ) : (
-                            <div style={{ color: '#aaa', fontSize: '0.75rem', textAlign: 'center' }}>
-                              No Image
-                            </div>
-                          )}
-                        </div>
+                          Multiple Size Options & Individual Prices *
+                        </label>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          Every product supports multiple size options. Each option must have a Numerical Measurement, Size Name, and Individual Price.
+                        </span>
+                      </div>
 
-                        {/* Reorder & Set Primary Toolbar */}
-                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', gap: '4px' }}>
-                            <button
-                              type="button"
-                              disabled={idx === 0}
-                              onClick={() => handleMoveSlot(idx, idx - 1)}
-                              title="Move Left (Reorder)"
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={handleLoadPresetSizes}
+                          className="btn btn-secondary btn-sm"
+                          style={{ fontSize: '0.75rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          title="Load 8 common sizes: 48×75 Double, 60×75 Queen, 72×72 King, etc."
+                        >
+                          ⚡ Load Size Preset
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAddSizeOption}
+                          className="btn btn-primary btn-sm"
+                          style={{ fontSize: '0.75rem', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Plus size={14} /> Add Size Option
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Size Options Table */}
+                    <div
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-color)',
+                        overflowX: 'auto',
+                      }}
+                    >
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', backgroundColor: 'rgba(0,0,0,0.03)' }}>
+                            <th style={{ padding: '8px 12px', fontWeight: 600, width: '32%' }}>1. Numerical Measurement</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 600, width: '32%' }}>2. Size Name</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 600, width: '24%' }}>3. Individual Price (₹) *</th>
+                            <th style={{ padding: '8px 12px', fontWeight: 600, textAlign: 'center', width: '12%' }}>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(formData.sizes || []).map((s, idx) => (
+                            <tr key={idx} style={{ borderBottom: idx < (formData.sizes || []).length - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                              {/* 1. Numerical Measurement */}
+                              <td style={{ padding: '8px 12px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. 48×75, 60×75, 72×72"
+                                  value={s.measurement || ''}
+                                  onChange={(e) => handleSizeOptionChange(idx, 'measurement', e.target.value)}
+                                  style={{ fontSize: '0.82rem', padding: '6px 10px', width: '100%' }}
+                                />
+                              </td>
+
+                              {/* 2. Size Name */}
+                              <td style={{ padding: '8px 12px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Double, Queen, King, Free Size"
+                                  value={s.name || ''}
+                                  required
+                                  onChange={(e) => handleSizeOptionChange(idx, 'name', e.target.value)}
+                                  style={{ fontSize: '0.82rem', padding: '6px 10px', width: '100%' }}
+                                  list="size-presets"
+                                />
+                              </td>
+
+                              {/* 3. Individual Price */}
+                              <td style={{ padding: '8px 12px' }}>
+                                <div style={{ position: 'relative' }}>
+                                  <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>₹</span>
+                                  <input
+                                    type="number"
+                                    placeholder="e.g. 344"
+                                    min={0}
+                                    required
+                                    value={s.price}
+                                    onChange={(e) => handleSizeOptionChange(idx, 'price', e.target.value)}
+                                    style={{ fontSize: '0.82rem', padding: '6px 10px 6px 20px', width: '100%' }}
+                                  />
+                                </div>
+                              </td>
+
+                              {/* Action / Delete */}
+                              <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSizeOption(idx)}
+                                  disabled={(formData.sizes || []).length <= 1}
+                                  title={(formData.sizes || []).length <= 1 ? 'Product must have at least one size option' : 'Delete this size option'}
+                                  style={{
+                                    border: 'none',
+                                    background: 'none',
+                                    color: (formData.sizes || []).length <= 1 ? 'var(--text-muted)' : '#C5221F',
+                                    cursor: (formData.sizes || []).length <= 1 ? 'not-allowed' : 'pointer',
+                                    opacity: (formData.sizes || []).length <= 1 ? 0.3 : 1,
+                                    padding: '4px',
+                                  }}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <datalist id="size-presets">
+                      <option value="King" />
+                      <option value="Queen" />
+                      <option value="Double" />
+                      <option value="Single" />
+                      <option value="Free Size" />
+                    </datalist>
+
+                    {/* Size Preview / Summary Pills */}
+                    {(formData.sizes || []).length > 0 && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                          Size Summary ({(formData.sizes || []).length} Options):
+                        </span>
+                        {(formData.sizes || []).map((s, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              backgroundColor: 'var(--bg-card)',
+                              borderRadius: '4px',
+                              border: '1px solid var(--border-color)',
+                              color: 'var(--text-primary)',
+                            }}
+                          >
+                            {s.measurement ? `${s.measurement} (${s.name})` : (s.name || 'Size')} : <strong>₹{s.price || 0}</strong>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Stock Quantity *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min={0}
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        SKU Code
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Auto or VST-XXX"
+                        value={formData.sku}
+                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Material
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.material}
+                        onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Pattern
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.pattern}
+                        onChange={(e) => setFormData({ ...formData, pattern: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                        Color
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Beige, Soft Blue"
+                        value={formData.color}
+                        onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, margin: 0 }}>
+                          Product Images *
+                        </label>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          Minimum: 2 images | Maximum: 4 images. Image 1 is the <strong>Primary Image</strong> shown across catalog and cards.
+                        </span>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          padding: '3px 10px',
+                          borderRadius: '9999px',
+                          backgroundColor: (formData.images || []).length >= 2 && (formData.images || []).length <= 4 ? '#E6F4EA' : '#FCE8E6',
+                          color: (formData.images || []).length >= 2 && (formData.images || []).length <= 4 ? '#137333' : '#C5221F',
+                        }}
+                      >
+                        {(formData.images || []).length} / 4 Images
+                      </span>
+                    </div>
+
+                    {/* Horizontal Image Slots Grid */}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                        gap: '12px',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      {(formData.images || []).map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            border: idx === 0 ? '2px solid var(--accent-color, #8B6239)' : '1px solid var(--border-color)',
+                            borderRadius: '8px',
+                            padding: '10px',
+                            backgroundColor: idx === 0 ? 'rgba(139, 98, 57, 0.04)' : 'var(--bg-secondary)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            boxShadow: idx === 0 ? '0 2px 8px rgba(139, 98, 57, 0.12)' : 'none',
+                          }}
+                        >
+                          {/* Header badge & delete */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span
                               style={{
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-card)',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.04em',
+                                color: idx === 0 ? '#8B6239' : 'var(--text-muted)',
+                                backgroundColor: idx === 0 ? '#F9F3EC' : 'var(--bg-card)',
+                                padding: '2px 8px',
                                 borderRadius: '4px',
-                                padding: '3px 6px',
-                                cursor: idx === 0 ? 'not-allowed' : 'pointer',
-                                opacity: idx === 0 ? 0.3 : 1,
-                                display: 'flex',
-                                alignItems: 'center',
+                                border: idx === 0 ? '1px solid #D7C4B2' : '1px solid var(--border-color)',
                               }}
                             >
-                              <ArrowLeft size={12} />
-                            </button>
+                              {idx === 0 ? '⭐ Primary' : `Image ${idx + 1}`}
+                            </span>
 
                             <button
                               type="button"
-                              disabled={idx === (formData.images || []).length - 1}
-                              onClick={() => handleMoveSlot(idx, idx + 1)}
-                              title="Move Right (Reorder)"
+                              onClick={() => handleRemoveSlot(idx)}
+                              disabled={(formData.images || []).length <= 2}
+                              title={(formData.images || []).length <= 2 ? 'Minimum 2 images required' : 'Remove image'}
                               style={{
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-card)',
-                                borderRadius: '4px',
-                                padding: '3px 6px',
-                                cursor: idx === (formData.images || []).length - 1 ? 'not-allowed' : 'pointer',
-                                opacity: idx === (formData.images || []).length - 1 ? 0.3 : 1,
+                                border: 'none',
+                                background: 'none',
+                                color: (formData.images || []).length <= 2 ? 'var(--text-muted)' : '#C5221F',
+                                cursor: (formData.images || []).length <= 2 ? 'not-allowed' : 'pointer',
+                                padding: '2px',
                                 display: 'flex',
                                 alignItems: 'center',
+                                opacity: (formData.images || []).length <= 2 ? 0.35 : 1,
                               }}
                             >
-                              <ArrowRight size={12} />
+                              <Trash2 size={14} />
                             </button>
                           </div>
 
-                          {idx > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => handleSetPrimary(idx)}
-                              title="Set as Primary Image"
-                              style={{
-                                fontSize: '0.72rem',
-                                border: '1px solid var(--accent-color, #8B6239)',
-                                background: 'none',
-                                color: 'var(--accent-color, #8B6239)',
-                                borderRadius: '4px',
-                                padding: '3px 6px',
-                                cursor: 'pointer',
-                                fontWeight: 600,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                              }}
-                            >
-                              <Star size={11} /> Primary
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Replace File Upload Button */}
-                        <label
-                          style={{
-                            fontSize: '0.72rem',
-                            textAlign: 'center',
-                            padding: '4px 6px',
-                            backgroundColor: 'var(--bg-card)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px',
-                            color: 'var(--text-secondary)',
-                          }}
-                        >
-                          <Upload size={12} /> Replace Image
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleSlotFileUpload(idx, file);
+                          {/* Image Preview Box */}
+                          <div
+                            style={{
+                              width: '100%',
+                              height: '110px',
+                              borderRadius: '6px',
+                              overflow: 'hidden',
+                              backgroundColor: '#1a1a1a',
+                              position: 'relative',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
-                            style={{ display: 'none' }}
+                          >
+                            {uploadingSlot === idx ? (
+                              <div style={{ color: '#fff', fontSize: '0.75rem', textAlign: 'center', padding: '8px' }}>
+                                Uploading...
+                              </div>
+                            ) : imgUrl ? (
+                              <img
+                                src={imgUrl}
+                                alt={`Product Image ${idx + 1}`}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={(e) => {
+                                  e.target.style.opacity = 0.3;
+                                }}
+                              />
+                            ) : (
+                              <div style={{ color: '#aaa', fontSize: '0.75rem', textAlign: 'center' }}>
+                                No Image
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Reorder & Set Primary Toolbar */}
+                          <div style={{ display: 'flex', gap: '4px', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveSlot(idx, idx - 1)}
+                                title="Move Left (Reorder)"
+                                style={{
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: '4px',
+                                  padding: '3px 6px',
+                                  cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === 0 ? 0.3 : 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <ArrowLeft size={12} />
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={idx === (formData.images || []).length - 1}
+                                onClick={() => handleMoveSlot(idx, idx + 1)}
+                                title="Move Right (Reorder)"
+                                style={{
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-card)',
+                                  borderRadius: '4px',
+                                  padding: '3px 6px',
+                                  cursor: idx === (formData.images || []).length - 1 ? 'not-allowed' : 'pointer',
+                                  opacity: idx === (formData.images || []).length - 1 ? 0.3 : 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <ArrowRight size={12} />
+                              </button>
+                            </div>
+
+                            {idx > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetPrimary(idx)}
+                                title="Set as Primary Image"
+                                style={{
+                                  fontSize: '0.72rem',
+                                  border: '1px solid var(--accent-color, #8B6239)',
+                                  background: 'none',
+                                  color: 'var(--accent-color, #8B6239)',
+                                  borderRadius: '4px',
+                                  padding: '3px 6px',
+                                  cursor: 'pointer',
+                                  fontWeight: 600,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                }}
+                              >
+                                <Star size={11} /> Primary
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Replace File Upload Button */}
+                          <label
+                            style={{
+                              fontSize: '0.72rem',
+                              textAlign: 'center',
+                              padding: '4px 6px',
+                              backgroundColor: 'var(--bg-card)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              color: 'var(--text-secondary)',
+                            }}
+                          >
+                            <Upload size={12} /> Replace Image
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleSlotFileUpload(idx, file);
+                              }}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+
+                          {/* Direct URL Input */}
+                          <input
+                            type="text"
+                            placeholder="Paste image URL..."
+                            value={imgUrl}
+                            onChange={(e) => handleSlotUrlChange(idx, e.target.value)}
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              border: '1px solid var(--border-color)',
+                              width: '100%',
+                            }}
                           />
-                        </label>
+                        </div>
+                      ))}
 
-                        {/* Direct URL Input */}
-                        <input
-                          type="text"
-                          placeholder="Paste image URL..."
-                          value={imgUrl}
-                          onChange={(e) => handleSlotUrlChange(idx, e.target.value)}
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '4px 6px',
-                            borderRadius: '4px',
-                            border: '1px solid var(--border-color)',
-                            width: '100%',
-                          }}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Add Image Slot Button Card (visible when < 4) */}
-                    {(formData.images || []).length < 4 && (
-                      <div
-                        style={{
-                          border: '2px dashed var(--border-color)',
-                          borderRadius: '8px',
-                          padding: '16px 12px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                          backgroundColor: 'var(--bg-secondary)',
-                          minHeight: '220px',
-                          textAlign: 'center',
-                        }}
-                      >
+                      {/* Add Image Slot Button Card (visible when < 4) */}
+                      {(formData.images || []).length < 4 && (
                         <div
                           style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '50%',
-                            backgroundColor: 'var(--bg-card)',
+                            border: '2px dashed var(--border-color)',
+                            borderRadius: '8px',
+                            padding: '16px 12px',
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: 'var(--accent-color, #8B6239)',
+                            gap: '8px',
+                            backgroundColor: 'var(--bg-secondary)',
+                            minHeight: '220px',
+                            textAlign: 'center',
                           }}
                         >
-                          <Plus size={18} />
-                        </div>
-
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          Add Image ({(formData.images || []).length + 1} of 4)
-                        </span>
-
-                        <label
-                          className="btn btn-secondary btn-sm"
-                          style={{
-                            cursor: 'pointer',
-                            fontSize: '0.74rem',
-                            padding: '5px 10px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            marginTop: '2px',
-                          }}
-                        >
-                          <Upload size={12} /> Upload File
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleAddNewSlotWithFile(file);
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              backgroundColor: 'var(--bg-card)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--accent-color, #8B6239)',
                             }}
-                            style={{ display: 'none' }}
-                          />
-                        </label>
+                          >
+                            <Plus size={18} />
+                          </div>
 
-                        <button
-                          type="button"
-                          onClick={handleAddNewEmptySlot}
-                          className="btn btn-sm"
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '4px 8px',
-                            background: 'none',
-                            border: '1px solid var(--border-color)',
-                            color: 'var(--text-muted)',
-                          }}
-                        >
-                          + Add URL Slot
-                        </button>
-                      </div>
-                    )}
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                            Add Image ({(formData.images || []).length + 1} of 4)
+                          </span>
+
+                          <label
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              cursor: 'pointer',
+                              fontSize: '0.74rem',
+                              padding: '5px 10px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              marginTop: '2px',
+                            }}
+                          >
+                            <Upload size={12} /> Upload File
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleAddNewSlotWithFile(file);
+                              }}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={handleAddNewEmptySlot}
+                            className="btn btn-sm"
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '4px 8px',
+                              background: 'none',
+                              border: '1px solid var(--border-color)',
+                              color: 'var(--text-muted)',
+                            }}
+                          >
+                            + Add URL Slot
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '24px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.isFeatured}
+                        onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                        style={{ width: 'auto' }}
+                      />
+                      Featured on Homepage
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.isActive}
+                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                        style={{ width: 'auto' }}
+                      />
+                      Active (Visible in Store)
+                    </label>
                   </div>
                 </div>
-
-                <div style={{ display: 'flex', gap: '24px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      style={{ width: 'auto' }}
-                    />
-                    Featured on Homepage
-                  </label>
-
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      style={{ width: 'auto' }}
-                    />
-                    Active (Visible in Store)
-                  </label>
-                </div>
               </div>
-            </div>
 
               {/* Modal Footer (Fixed / pinned at bottom) */}
               <div
