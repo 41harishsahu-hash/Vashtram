@@ -24,6 +24,11 @@ const attachConnectionListeners = () => {
 };
 
 const connectDB = async () => {
+  // Reuse existing connection if already connected (vital for serverless cold/warm starts)
+  if (mongoose.connection.readyState >= 1) {
+    return mongoose.connection;
+  }
+
   attachConnectionListeners();
 
   const isProduction = process.env.NODE_ENV === 'production';

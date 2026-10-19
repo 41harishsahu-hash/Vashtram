@@ -4,7 +4,6 @@
 # ==============================================================================
 
 # Backend and Server code
-server/
 scripts/
 
 # Environment and Secrets
