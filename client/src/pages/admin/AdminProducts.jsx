@@ -798,7 +798,7 @@ const AdminProducts = () => {
             style={{
               position: 'relative',
               width: '850px',
-              maxWidth: '100%',
+              maxWidth: 'calc(100vw - 32px)',
               maxHeight: '90vh',
               backgroundColor: 'var(--bg-card)',
               borderRadius: 'var(--radius-md)',
@@ -807,19 +807,22 @@ const AdminProducts = () => {
               display: 'flex',
               flexDirection: 'column',
               zIndex: 4001,
+              overflow: 'hidden',
             }}
           >
             {/* Modal Header */}
             <div
               style={{
-                padding: '20px 24px',
+                padding: '18px 24px',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                flexShrink: 0,
+                backgroundColor: 'var(--bg-card)',
               }}
             >
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
                 {editingProduct ? 'Edit Product Details' : 'Add New Product'}
               </h2>
               <button
@@ -827,8 +830,8 @@ const AdminProducts = () => {
                 aria-label="Close product modal"
                 onClick={() => setModalOpen(false)}
                 style={{
-                  minWidth: '44px',
-                  minHeight: '44px',
+                  minWidth: '40px',
+                  minHeight: '40px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -836,15 +839,35 @@ const AdminProducts = () => {
                   border: 'none',
                   color: 'var(--text-muted)',
                   cursor: 'pointer',
+                  borderRadius: '4px',
                 }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} style={{ padding: '24px', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Modal Body & Footer Form */}
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                minHeight: 0,
+                overflow: 'hidden',
+              }}
+            >
+              {/* Scrollable Form Content */}
+              <div
+                style={{
+                  padding: '24px',
+                  overflowY: 'auto',
+                  flex: 1,
+                  minHeight: 0,
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
                     Product Title *
@@ -931,7 +954,7 @@ const AdminProducts = () => {
                     ) : (
                       formData.sizes && formData.sizes.length > 0 && (
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '4px', display: 'block' }}>
-                          Optional when size variants have individual prices
+                          Optional when size variants have individual prices (individual size prices take precedence on storefront)
                         </span>
                       )
                     )}
@@ -1511,16 +1534,19 @@ const AdminProducts = () => {
                   </label>
                 </div>
               </div>
+            </div>
 
-              {/* Modal Footer */}
+              {/* Modal Footer (Fixed / pinned at bottom) */}
               <div
                 style={{
-                  marginTop: '28px',
-                  paddingTop: '16px',
+                  flexShrink: 0,
+                  padding: '16px 24px',
                   borderTop: '1px solid var(--border-color)',
                   display: 'flex',
                   justifyContent: 'flex-end',
+                  alignItems: 'center',
                   gap: '12px',
+                  backgroundColor: 'var(--bg-card)',
                 }}
               >
                 <button

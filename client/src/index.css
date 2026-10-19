@@ -119,7 +119,7 @@ body.dark {
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
   -webkit-text-size-adjust: 100%;
 }
@@ -135,7 +135,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a {

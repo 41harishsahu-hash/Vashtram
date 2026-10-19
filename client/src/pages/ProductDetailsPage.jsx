@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/useCart';
 import ProductCard from '../components/common/ProductCard';
 import { formatSizeLabel } from '../utils/sizeHelper';
+import useBodyScrollLock from '../utils/useBodyScrollLock';
 import {
   Star,
   ChevronLeft,
@@ -16,6 +18,7 @@ import {
   ChevronRight,
   Plus,
   Minus,
+  X,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/common/WhatsAppButton';
 import { useSettings } from '../context/useSettings';
@@ -38,6 +41,27 @@ const ProductDetailsPage = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+
+  // Lock background scroll when lightbox is open
+  useBodyScrollLock(isLightboxOpen);
+
+  // Close lightbox on Escape key and navigate with Left/Right Arrow keys
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      } else if (e.key === 'ArrowLeft') {
+        const imgList = product?.images && product.images.length > 0 ? product.images : [PLACEHOLDER_IMAGE];
+        setSelectedImage((prev) => (prev > 0 ? prev - 1 : imgList.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        const imgList = product?.images && product.images.length > 0 ? product.images : [PLACEHOLDER_IMAGE];
+        setSelectedImage((prev) => (prev < imgList.length - 1 ? prev + 1 : 0));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLightboxOpen, product?.images]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -109,17 +133,18 @@ const ProductDetailsPage = () => {
   const hasMultipleSizes = product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0;
   const currentSelectedSize = hasMultipleSizes ? product.sizes[selectedSizeIndex] || product.sizes[0] : null;
 
-  const hasDiscount = Boolean(
-    discountPrice && Number(discountPrice) > 0 && Number(discountPrice) < Number(price)
-  );
-
+  const originalPrice = Number(price) || 0;
   const currentPrice = currentSelectedSize
     ? Number(currentSelectedSize.price)
-    : (hasDiscount ? Number(discountPrice) : price);
+    : (discountPrice && Number(discountPrice) > 0 && Number(discountPrice) < originalPrice
+      ? Number(discountPrice)
+      : originalPrice);
 
+  const hasDiscount = originalPrice > currentPrice;
+  const savingsAmount = hasDiscount ? originalPrice - currentPrice : 0;
   const discountPercent =
-    hasDiscount && !currentSelectedSize
-      ? Math.round(((price - Number(discountPrice)) / price) * 100)
+    hasDiscount && originalPrice > 0
+      ? Math.round((savingsAmount / originalPrice) * 100)
       : 0;
 
   const currentSizeLabel = currentSelectedSize
@@ -183,8 +208,8 @@ const ProductDetailsPage = () => {
           }}
           className="product-details-grid"
         >
-          {/* Left Column: Horizontal Image Carousel & Gallery */}
-          <div>
+          {/* Left Column: Horizontal Image Carousel & Gallery (Sticky on Desktop) */}
+          <div className="product-gallery-sticky">
             {/* Main Carousel Viewport Frame */}
             <div
               style={{
@@ -493,76 +518,6 @@ const ProductDetailsPage = () => {
                 ))}
               </div>
             )}
-
-            {/* Fullscreen Lightbox Modal */}
-            {isLightboxOpen && (
-              <div
-                onClick={() => setIsLightboxOpen(false)}
-                style={{
-                  position: 'fixed',
-                  inset: 0,
-                  backgroundColor: 'rgba(10, 10, 10, 0.92)',
-                  backdropFilter: 'blur(8px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 'var(--z-modal, 50000)',
-                  padding: '24px',
-                }}
-              >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    position: 'relative',
-                    maxWidth: '1000px',
-                    maxHeight: '90vh',
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
-                >
-                  <img
-                    src={resolveImageUrl(images[selectedImage])}
-                    alt={`${name} Fullscreen`}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '80vh',
-                      objectFit: 'contain',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                    }}
-                  />
-
-                  <div style={{ marginTop: '16px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <button
-                      onClick={() => setSelectedImage((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
-                      className="btn btn-secondary btn-sm"
-                      style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}
-                    >
-                      ← Previous
-                    </button>
-                    <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>
-                      {selectedImage + 1} / {images.length}
-                    </span>
-                    <button
-                      onClick={() => setSelectedImage((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
-                      className="btn btn-secondary btn-sm"
-                      style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}
-                    >
-                      Next →
-                    </button>
-                    <button
-                      onClick={() => setIsLightboxOpen(false)}
-                      className="btn btn-sm"
-                      style={{ marginLeft: '12px', color: '#fff', backgroundColor: 'rgba(200,50,50,0.8)' }}
-                    >
-                      Close ✕
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Column: Information & Purchase */}
@@ -653,7 +608,7 @@ const ProductDetailsPage = () => {
                       textDecoration: 'line-through',
                     }}
                   >
-                    ₹{price.toLocaleString('en-IN')}
+                    ₹{originalPrice.toLocaleString('en-IN')}
                   </span>
                   <span
                     style={{
@@ -662,7 +617,7 @@ const ProductDetailsPage = () => {
                       color: '#137333',
                     }}
                   >
-                    You Save ₹{(price - Number(discountPrice)).toLocaleString('en-IN')} ({discountPercent}%)
+                    You Save ₹{savingsAmount.toLocaleString('en-IN')} ({discountPercent}%)
                   </span>
                 </>
               )}
@@ -1253,11 +1208,172 @@ const ProductDetailsPage = () => {
         )}
       </div>
 
+      {/* Fullscreen Lightbox Modal (Portal to body to ensure top-level stacking above all page elements) */}
+      {isLightboxOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${name} Fullscreen Gallery`}
+          onClick={() => setIsLightboxOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(10, 10, 10, 0.94)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 'var(--z-modal, 50000)',
+            padding: 'clamp(12px, 3vw, 24px)',
+            boxSizing: 'border-box',
+          }}
+        >
+          {/* Modal Container */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              maxWidth: '1100px',
+              maxHeight: '94vh',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Top-Right Floating Close Button */}
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(false)}
+              aria-label="Close fullscreen view"
+              title="Close (Esc)"
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 20,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Main Centered Image Area */}
+            <div
+              style={{
+                flex: 1,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 0,
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={resolveImageUrl((images.length > 0 ? images[selectedImage] : null) || PLACEHOLDER_IMAGE)}
+                alt={`${name} Fullscreen`}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '78vh',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.6)',
+                }}
+              />
+            </div>
+
+            {/* Bottom Controls Bar */}
+            <div
+              style={{
+                marginTop: '16px',
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                zIndex: 10,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  const imgList = images.length > 0 ? images : [PLACEHOLDER_IMAGE];
+                  setSelectedImage((prev) => (prev > 0 ? prev - 1 : imgList.length - 1));
+                }}
+                className="btn btn-secondary btn-sm"
+                style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}
+              >
+                ← Previous
+              </button>
+              <span style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>
+                {selectedImage + 1} / {images.length || 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const imgList = images.length > 0 ? images : [PLACEHOLDER_IMAGE];
+                  setSelectedImage((prev) => (prev < imgList.length - 1 ? prev + 1 : 0));
+                }}
+                className="btn btn-secondary btn-sm"
+                style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}
+              >
+                Next →
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(false)}
+                className="btn btn-sm"
+                style={{ marginLeft: '12px', color: '#fff', backgroundColor: 'rgba(200,50,50,0.85)' }}
+              >
+                Close ✕
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       <style>{`
+        @media (min-width: 861px) {
+          .product-gallery-sticky {
+            position: -webkit-sticky !important;
+            position: sticky !important;
+            top: 92px !important;
+            align-self: start !important;
+            max-height: calc(100vh - 104px);
+          }
+        }
         @media (max-width: 860px) {
           .product-details-grid {
             grid-template-columns: 1fr !important;
             gap: 28px !important;
+          }
+          .product-gallery-sticky {
+            position: static !important;
+            top: auto !important;
+            align-self: auto !important;
+            max-height: none !important;
           }
         }
         @media (max-width: 540px) {
