@@ -7,7 +7,7 @@ const DEFAULT_REASONS = [
     icon: 'Feather',
     title: 'Premium Fabric',
     description:
-      'Soft & Breathable 100% pure combed cotton that feels gentle on sensitive skin all year round.',
+      '100% Waterproof with 220+ GSM',
   },
   {
     icon: 'Palette',
