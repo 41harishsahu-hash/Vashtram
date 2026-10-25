@@ -169,9 +169,8 @@ app.use(
         return callback(null, true);
       }
 
-      // If a Vercel domain is configured in CLIENT_URL or SITE_URL, allow project preview deployments
-      const hasVercelDomain = allowedOrigins.some((url) => url.includes('.vercel.app'));
-      if (hasVercelDomain && /^https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app$/i.test(normalizedOrigin)) {
+      // Allow any Vercel deployment for the project (*.vercel.app)
+      if (/^https:\/\/[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*\.vercel\.app$/i.test(normalizedOrigin)) {
         return callback(null, true);
       }
 
