@@ -130,10 +130,18 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // Environment-based CORS configuration
 const clientUrls = (process.env.CLIENT_URL || '')
   .split(',')
-  .map((url) => url.trim().replace(/\/$/, ''))
+  .map((url) => url.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
 const allowedOrigins = [...clientUrls];
+
+// Include canonical storefront SITE_URL if defined
+if (process.env.SITE_URL) {
+  const normalizedSiteUrl = process.env.SITE_URL.trim().replace(/\/+$/, '');
+  if (normalizedSiteUrl && !allowedOrigins.includes(normalizedSiteUrl)) {
+    allowedOrigins.push(normalizedSiteUrl);
+  }
+}
 
 if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
   allowedOrigins.push(
@@ -156,8 +164,14 @@ app.use(
         return callback(null, true);
       }
 
-      const normalizedOrigin = origin.replace(/\/$/, '');
+      const normalizedOrigin = origin.trim().replace(/\/+$/, '');
       if (allowedOrigins.includes(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      // If a Vercel domain is configured in CLIENT_URL or SITE_URL, allow project preview deployments
+      const hasVercelDomain = allowedOrigins.some((url) => url.includes('.vercel.app'));
+      if (hasVercelDomain && /^https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app$/i.test(normalizedOrigin)) {
         return callback(null, true);
       }
 
@@ -168,6 +182,10 @@ app.use(
         }
       }
 
+      console.warn(
+        `[VASHTRAM CORS Blocked]: Origin "${origin}" rejected. Configured allowed origins:`,
+        allowedOrigins
+      );
       return callback(new Error('CORS policy: Not allowed by CORS'));
     },
     credentials: true,

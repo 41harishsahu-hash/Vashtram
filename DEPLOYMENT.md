@@ -171,16 +171,24 @@ To ensure zero downtime, prevent race conditions, and guarantee that unique cons
    * **Index Creation**: If clean, it creates all required unique and partial production indexes.
    * **Startup Guard**: If the backend boots in production with missing critical indexes, startup will fail immediately with code 1.
 3. **Step 3: Deploy Backend Server**
-   Start the Node.js API service (`node server/server.js`). It verifies configuration, checks that indexes are active, and connects to MongoDB.
+   Start the Node.js API service (`node backend/server.js` or `npm start`). It verifies configuration, checks that indexes are active, and connects to MongoDB.
 4. **Step 4: Deploy Frontend Client**
    Build and deploy the React client application (`npm run build`).
 
 ---
 
-## 8. Backend Deployment
+## 8. Backend Deployment (Render / Cloud Host)
 
-* **Build Command**: `cd server && npm install --production`
-* **Start Command**: `node server/server.js` (or `npm start` from root)
+### Recommended Render Configuration:
+* **Root Directory**: `backend`
+* **Build Command**: `npm install`
+* **Start Command**: `node server.js` (or `npm start`)
+
+### Alternative (Deploying from Repository Root):
+* **Root Directory**: *(leave blank)*
+* **Build Command**: `npm --prefix backend install`
+* **Start Command**: `node backend/server.js`
+
 * **Health Check Endpoint**: `GET /api/health` returns `200 OK` with database connection status.
 
 ---

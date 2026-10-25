@@ -2,7 +2,20 @@ import axios from 'axios';
 import { storage } from '../utils/storage';
 import { isAuthEntrypoint } from '../utils/authHelper';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+// Normalize base API URL to prevent missing or duplicated /api prefixes
+const resolveApiBaseUrl = () => {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+  if (!envUrl) return '/api';
+  // Strip trailing slashes
+  const clean = envUrl.replace(/\/+$/, '');
+  // If an absolute HTTP/HTTPS URL is provided without /api, append /api
+  if (/^https?:\/\//i.test(clean) && !clean.endsWith('/api')) {
+    return `${clean}/api`;
+  }
+  return clean;
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -100,6 +100,13 @@ const HomePage = () => {
             <div style={{ textAlign: 'center', padding: '60px 0' }}>
               <p style={{ color: 'var(--text-muted)' }}>Loading featured collections...</p>
             </div>
+          ) : featuredProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+              <p>Explore our premium mattress protector catalog in the shop.</p>
+              <Link to="/shop" className="btn btn-secondary btn-sm" style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Browse All Products <ArrowRight size={14} />
+              </Link>
+            </div>
           ) : (
             <div className="responsive-product-grid">
               {featuredProducts.slice(0, 4).map((product) => (
