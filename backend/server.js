@@ -343,6 +343,52 @@ app.use(
   express.static(path.join(__dirname, 'uploads'))
 );
 
+// Serverless DB connection initialization middleware (reused across warm invocations)
+let isServerlessDbReady = false;
+let serverlessDbPromise = null;
+
+const initServerlessDb = async () => {
+  if (isServerlessDbReady && mongoose.connection.readyState >= 1) return;
+  if (!serverlessDbPromise) {
+    serverlessDbPromise = (async () => {
+      validateStartupConfig();
+      await connectDB();
+      try {
+        await ensureDefaultUsers();
+      } catch (userErr) {
+        console.warn('[Serverless Init]: ensureDefaultUsers warning:', userErr.message);
+      }
+      try {
+        await ensureDefaultFeatures();
+      } catch (featErr) {
+        console.warn('[Serverless Init]: ensureDefaultFeatures warning:', featErr.message);
+      }
+      isServerlessDbReady = true;
+    })().catch((err) => {
+      serverlessDbPromise = null; // Allow retry on subsequent requests if connection failed
+      throw err;
+    });
+  }
+  return serverlessDbPromise;
+};
+
+// Ensure MongoDB connection is initialized for serverless requests (warm lambdas reuse connection)
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState >= 1 || req.path === '/api/health' || req.path === '/robots.txt' || req.path === '/sitemap.xml') {
+    return next();
+  }
+  try {
+    await initServerlessDb();
+    next();
+  } catch (err) {
+    console.error('[Serverless DB Error]:', err.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection failed: ' + err.message,
+    });
+  }
+});
+
 // API Health Check (Safe, does not expose internal host, credentials, or filesystem info)
 app.get('/api/health', (req, res) => {
   const isDbConnected = mongoose.connection.readyState === 1;
@@ -640,7 +686,7 @@ const startServer = async () => {
   return server;
 };
 
-if (require.main === module) {
+if (require.main === module && !process.env.VERCEL) {
   startServer();
 }
 
@@ -649,15 +695,18 @@ process.on('unhandledRejection', (err) => {
   console.error(`[Unhandled Rejection]: ${err.message}`);
 });
 
-module.exports = {
-  app,
-  startServer,
-  validateProductionConfig,
-  validateStartupConfig,
-  resolveTrustProxy,
-  createRateLimiter,
-  loginLimiter,
-  loginEmailLimiter,
-  adminLoginLimiter,
-  adminLoginEmailLimiter,
-};
+// Attach all named exports and helpers to the Express application function
+// for full backward compatibility with destructuring and submodules
+app.app = app;
+app.startServer = startServer;
+app.validateProductionConfig = validateProductionConfig;
+app.validateStartupConfig = validateStartupConfig;
+app.resolveTrustProxy = resolveTrustProxy;
+app.createRateLimiter = createRateLimiter;
+app.loginLimiter = loginLimiter;
+app.loginEmailLimiter = loginEmailLimiter;
+app.adminLoginLimiter = adminLoginLimiter;
+app.adminLoginEmailLimiter = adminLoginEmailLimiter;
+app.default = app;
+
+module.exports = app;
