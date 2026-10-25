@@ -374,24 +374,44 @@ const initServerlessDb = async () => {
 
 // Ensure MongoDB connection is initialized for serverless requests (warm lambdas reuse connection)
 app.use(async (req, res, next) => {
-  if (mongoose.connection.readyState >= 1 || req.path === '/api/health' || req.path === '/robots.txt' || req.path === '/sitemap.xml') {
+  if (
+    mongoose.connection.readyState >= 1 ||
+    req.path === '/' ||
+    req.path === '/api/health' ||
+    req.path === '/robots.txt' ||
+    req.path === '/sitemap.xml'
+  ) {
     return next();
   }
   try {
     await initServerlessDb();
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database connection is not active');
+    }
     next();
   } catch (err) {
     console.error('[Serverless DB Error]:', err.message);
-    return res.status(500).json({
+    return res.status(503).json({
       success: false,
-      message: 'Database connection failed: ' + err.message,
+      message: 'Database service is currently unavailable. Please try again shortly.',
     });
   }
 });
 
 // API Health Check (Safe, does not expose internal host, credentials, or filesystem info)
-app.get('/api/health', (req, res) => {
-  const isDbConnected = mongoose.connection.readyState === 1;
+app.get('/api/health', async (req, res) => {
+  let isDbConnected = mongoose.connection.readyState === 1;
+
+  // In serverless cold starts, initialize connection if not already established
+  if (!isDbConnected) {
+    try {
+      await initServerlessDb();
+      isDbConnected = mongoose.connection.readyState === 1;
+    } catch (dbErr) {
+      console.warn('[Health Check Notice]: Database connection attempt failed:', dbErr.message);
+    }
+  }
+
   res.status(isDbConnected ? 200 : 503).json({
     success: true,
     status: isDbConnected ? 'ok' : 'degraded',
@@ -454,6 +474,18 @@ const renderIndexHtml = (req) => {
   return raw.replaceAll('__SITE_URL__', siteUrl);
 };
 
+// Minimal root status endpoint for API deployments (serves simple JSON status or defers to frontend SPA if present)
+app.get('/', (req, res, next) => {
+  if (fs.existsSync(clientDistPath) && req.accepts('html')) {
+    return next();
+  }
+  res.status(200).json({
+    success: true,
+    service: 'VASHTRAM E-Commerce API',
+    status: 'active',
+  });
+});
+
 if (fs.existsSync(clientDistPath)) {
   // Use index: false so requests to '/' hit the templating route
   app.use(express.static(clientDistPath, { index: false }));
@@ -506,6 +538,9 @@ const validateProductionConfig = () => {
       console.error(
         '[Production Configuration Error]: Please configure these variables in your hosting provider dashboard before deploying.'
       );
+      if (process.env.VERCEL) {
+        throw new Error(`Missing required environment variables in production: ${missing.join(', ')}`);
+      }
       process.exit(1);
     }
 
@@ -513,6 +548,9 @@ const validateProductionConfig = () => {
       console.error(
         '[Production Configuration Error]: JWT_SECRET must be at least 32 characters long and cryptographically strong (cannot be a default placeholder).'
       );
+      if (process.env.VERCEL) {
+        throw new Error('JWT_SECRET must be at least 32 characters long and cryptographically strong.');
+      }
       process.exit(1);
     }
 
@@ -529,6 +567,9 @@ const validateProductionConfig = () => {
         console.error(
           '[Production Configuration Error]: ADMIN_PASSWORD must be at least 12 characters long and contain uppercase, lowercase, number, and special character.'
         );
+        if (process.env.VERCEL) {
+          throw new Error('ADMIN_PASSWORD must be at least 12 characters long and contain uppercase, lowercase, number, and special character.');
+        }
         process.exit(1);
       }
     }
@@ -538,6 +579,9 @@ const validateProductionConfig = () => {
         console.error(
           '[Production Configuration Error]: RAZORPAY_KEY_ID must be a live mode key in production (must start with rzp_live_).'
         );
+        if (process.env.VERCEL) {
+          throw new Error('RAZORPAY_KEY_ID must be a live mode key in production (must start with rzp_live_).');
+        }
         process.exit(1);
       }
     }

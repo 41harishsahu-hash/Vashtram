@@ -57,13 +57,18 @@ const connectDB = async () => {
   const targetUri = configuredUri || (isProduction ? null : (process.env.ALLOW_LOCAL_DB_FALLBACK === 'true' ? localFallbackUri : null));
 
   if (!targetUri) {
-    console.error('[Configuration Error]: MONGODB_URI is required in environment.');
+    const errorMsg = '[Configuration Error]: MONGODB_URI is required in environment.';
+    console.error(errorMsg);
+    if (process.env.VERCEL) {
+      throw new Error('MONGODB_URI is required in environment.');
+    }
     process.exit(1);
   }
 
   const isAtlas = targetUri.includes('.mongodb.net');
-  // Use 15s in development (prevents false timeouts while Atlas firewall propagates after IP changes)
-  const timeoutMs = isProduction ? 30000 : 15000;
+  const isServerless = Boolean(process.env.VERCEL);
+  // Serverless environments need a shorter timeout (8s) to fit within Vercel's function execution window
+  const timeoutMs = isServerless ? 8000 : (isProduction ? 30000 : 15000);
 
   try {
     const conn = await mongoose.connect(targetUri, {
@@ -72,8 +77,8 @@ const connectDB = async () => {
     console.log(`[MongoDB Connected]: ${conn.connection.host}/${conn.connection.name}`);
   } catch (error) {
     let lastError = error;
-    // If Atlas connection failed, retry once after 2.5s in case Atlas IP whitelist rule is still propagating
-    if (isAtlas) {
+    // If Atlas connection failed, retry once after 2.5s in traditional server mode (skip in serverless to conserve budget)
+    if (isAtlas && !isServerless) {
       console.warn(`[MongoDB Atlas Notice]: Initial connection attempt failed (${sanitizeMongoError(error.message)}). Retrying in 2.5s for firewall rule propagation...`);
       await new Promise((resolve) => setTimeout(resolve, 2500));
       try {
@@ -128,6 +133,9 @@ const connectDB = async () => {
     console.error('  1. Check your internet connection.');
     console.error('  2. Verify credentials in server/.env (username, password, cluster URL).');
     console.error('  3. In MongoDB Atlas, go to "Network Access" -> add your current IP or 0.0.0.0/0.\n');
+    if (isServerless) {
+      throw new Error(`MongoDB connection failed: ${sanitizedError}`);
+    }
     process.exit(1);
   }
 };

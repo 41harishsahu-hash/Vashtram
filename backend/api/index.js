@@ -23,7 +23,10 @@ const initServerless = async () => {
         console.warn('[Vercel Serverless]: ensureDefaultFeatures warning:', featErr.message);
       }
       isInitialized = true;
-    })();
+    })().catch((err) => {
+      initPromise = null;
+      throw err;
+    });
   }
   return initPromise;
 };
