@@ -22,7 +22,10 @@ const FORBIDDEN_STRINGS = [
   'rzp_test_',
 ];
 
-const distDir = path.resolve(__dirname, '../client/dist');
+const directDist = path.resolve(__dirname, '../dist');
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+const legacyDist = path.resolve(__dirname, '../../client/dist');
+const distDir = fs.existsSync(directDist) ? directDist : (fs.existsSync(frontendDist) ? frontendDist : legacyDist);
 
 const checkDir = (dir, results = []) => {
   if (!fs.existsSync(dir)) {
@@ -47,7 +50,7 @@ const checkDir = (dir, results = []) => {
         for (const forbidden of FORBIDDEN_STRINGS) {
           if (content.toLowerCase().includes(forbidden.toLowerCase())) {
             results.push({
-              file: path.relative(path.resolve(__dirname, '..'), fullPath),
+              file: path.relative(path.resolve(__dirname, '../..'), fullPath),
               forbidden,
             });
           }

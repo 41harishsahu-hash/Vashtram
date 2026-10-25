@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:dist": "node scripts/verify-dist.js",
+    "test:smoke": "node scripts/test-smoke.js"
   },
   "dependencies": {
     "axios": "^1.20.0",

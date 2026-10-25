@@ -5,11 +5,18 @@
  * safely without requiring an active external network connection.
  */
 
+const path = require('path');
+process.env.NODE_PATH = [
+  path.join(__dirname, '../node_modules'),
+  path.join(__dirname, '../../node_modules'),
+].join(';');
+require('module').Module._initPaths();
+
 const jwt = require('jsonwebtoken');
-const Product = require('../server/models/Product');
-const Settings = require('../server/models/Settings');
-const WebhookEvent = require('../server/models/WebhookEvent');
-const { admin } = require('../server/middleware/authMiddleware');
+const Product = require('../models/Product');
+const Settings = require('../models/Settings');
+const WebhookEvent = require('../models/WebhookEvent');
+const { admin } = require('../middleware/authMiddleware');
 
 let passed = 0;
 let failed = 0;
@@ -217,7 +224,7 @@ assert(freeOrderCalc.total === 2200, 'Total with free shipping equals subtotal')
 // 6. CLIENT-SUPPLIED PRICE & SIZE VALIDATION (Issues #2 & #3)
 console.log('\n--- 6. Client-Supplied Price & Size Validation ---');
 
-const { calculateOrderPricing } = require('../server/controllers/paymentController');
+const { calculateOrderPricing } = require('../controllers/paymentController');
 
 // Mock Product.findById and Settings.getSingleton
 const originalFindById = Product.findById;
@@ -316,7 +323,7 @@ Settings.getSingleton = async () => ({
   // 7. CART STOCK AGGREGATION (Issue #6)
   console.log('\n--- 7. Cart Stock Aggregation & Limit Enforcement ---');
 
-  const { aggregateOrderItems } = require('../server/controllers/paymentController');
+  const { aggregateOrderItems } = require('../controllers/paymentController');
 
   // Test A: Combining duplicate items with exact same productId and size
   const duplicateCartItems = [
@@ -411,7 +418,7 @@ Settings.getSingleton = async () => ({
   // 9. DETACH INVENTORY FROM REFUNDS & STOCK RESTORED GUARD (Issue #7)
   console.log('\n--- 9. Inventory Detachment from Refunds & stockRestored Guard ---');
 
-  const Order = require('../server/models/Order');
+  const Order = require('../models/Order');
   const fs = require('fs');
   const path = require('path');
 
@@ -447,7 +454,7 @@ Settings.getSingleton = async () => ({
   assert(!returnedValErr, 'Order schema accepts "Returned" status');
 
   // Test C: refundService.js does NOT import Product or modify product stock
-  const refundServiceCode = fs.readFileSync(path.join(__dirname, '../server/services/refundService.js'), 'utf8');
+  const refundServiceCode = fs.readFileSync(path.join(__dirname, '../services/refundService.js'), 'utf8');
   assert(!refundServiceCode.includes("require('../models/Product')"), 'refundService.js does NOT import Product model');
   assert(!refundServiceCode.includes('$inc: { stock:'), 'refundService.js contains NO stock increment logic');
 
@@ -478,7 +485,7 @@ Settings.getSingleton = async () => ({
   // 10. SAFE REGEX SEARCH FILTERING (Issue #11)
   console.log('\n--- 10. Safe Regex Search in Inquiry Controller ---');
 
-  const { createSafeRegex } = require('../server/utils/regexHelper');
+  const { createSafeRegex } = require('../utils/regexHelper');
 
   // Test A: Unescaped special regex characters do NOT crash or throw SyntaxError
   let safeRegexSuccess = true;
@@ -496,19 +503,19 @@ Settings.getSingleton = async () => ({
   assert(singleParenRegex instanceof RegExp && singleParenRegex.test('('), 'Single unbalanced parenthesis safely escaped');
 
   // Test C: inquiryController.js uses createSafeRegex instead of raw unescaped new RegExp(search.trim())
-  const inquiryCode = fs.readFileSync(path.join(__dirname, '../server/controllers/inquiryController.js'), 'utf8');
+  const inquiryCode = fs.readFileSync(path.join(__dirname, '../controllers/inquiryController.js'), 'utf8');
   assert(inquiryCode.includes("createSafeRegex(search.trim()"), 'inquiryController.js uses createSafeRegex for search filtering');
   assert(!inquiryCode.includes("new RegExp(search.trim()"), 'inquiryController.js contains NO unescaped new RegExp(search.trim())');
 
   // 11. CUSTOMER NAVBAR SE ADMIN LINK HATAN
   console.log('\n--- 11. Customer Navbar Admin Link Removal ---');
-  const navbarCode = fs.readFileSync(path.join(__dirname, '../client/src/components/common/Navbar.jsx'), 'utf8');
+  const navbarCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/components/common/Navbar.jsx'), 'utf8');
   assert(!navbarCode.includes('/admin/login'), 'Customer Navbar contains no /admin/login link');
 
   // 12. ATOMIC STOCK RESTORATION BUG FIX
   console.log('\n--- 12. Atomic Stock Restoration Concurrency Guard ---');
-  const orderCtrlCode = fs.readFileSync(path.join(__dirname, '../server/controllers/orderController.js'), 'utf8');
-  const adminCtrlCode = fs.readFileSync(path.join(__dirname, '../server/controllers/adminController.js'), 'utf8');
+  const orderCtrlCode = fs.readFileSync(path.join(__dirname, '../controllers/orderController.js'), 'utf8');
+  const adminCtrlCode = fs.readFileSync(path.join(__dirname, '../controllers/adminController.js'), 'utf8');
   assert(orderCtrlCode.includes('Order.findOneAndUpdate'), 'orderController.js uses Order.findOneAndUpdate for atomic claim');
   assert(orderCtrlCode.includes('stockRestored: false'), 'orderController.js checks stockRestored: false in atomic filter');
   assert(adminCtrlCode.includes('Order.findOneAndUpdate'), 'adminController.js uses Order.findOneAndUpdate for atomic claim');
@@ -516,8 +523,8 @@ Settings.getSingleton = async () => ({
 
   // 13. DYNAMIC CONTACT DETAILS (FOOTER & CONTACT PAGE)
   console.log('\n--- 13. Dynamic Contact Details via useSettings ---');
-  const footerCode = fs.readFileSync(path.join(__dirname, '../client/src/components/common/Footer.jsx'), 'utf8');
-  const contactPageCode = fs.readFileSync(path.join(__dirname, '../client/src/pages/ContactPage.jsx'), 'utf8');
+  const footerCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/components/common/Footer.jsx'), 'utf8');
+  const contactPageCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/pages/ContactPage.jsx'), 'utf8');
   assert(footerCode.includes('useSettings()'), 'Footer.jsx calls useSettings() hook');
   assert(contactPageCode.includes('useSettings()'), 'ContactPage.jsx calls useSettings() hook');
   assert(contactPageCode.includes('{address}'), 'ContactPage.jsx renders address dynamically');
@@ -526,17 +533,17 @@ Settings.getSingleton = async () => ({
   // 14. HARDCODED TEXT & MATTRESS PROTECTOR CLEAN-UP
   console.log('\n--- 14. Mattress Protector Global Text Sweep ---');
   const clientFilesToCheck = [
-    '../client/src/components/common/Navbar.jsx',
-    '../client/src/components/common/Footer.jsx',
-    '../client/src/pages/ShopPage.jsx',
-    '../client/src/pages/OrdersPage.jsx',
-    '../client/src/pages/CheckoutPage.jsx',
-    '../client/src/pages/CategoriesPage.jsx',
-    '../client/src/pages/AboutPage.jsx',
-    '../client/src/components/home/BannerPromo.jsx',
-    '../client/src/components/home/WhyChooseUs.jsx',
-    '../client/src/components/home/ValueProps.jsx',
-    '../client/src/components/common/WhatsAppButton.jsx',
+    '../../frontend/src/components/common/Navbar.jsx',
+    '../../frontend/src/components/common/Footer.jsx',
+    '../../frontend/src/pages/ShopPage.jsx',
+    '../../frontend/src/pages/OrdersPage.jsx',
+    '../../frontend/src/pages/CheckoutPage.jsx',
+    '../../frontend/src/pages/CategoriesPage.jsx',
+    '../../frontend/src/pages/AboutPage.jsx',
+    '../../frontend/src/components/home/BannerPromo.jsx',
+    '../../frontend/src/components/home/WhyChooseUs.jsx',
+    '../../frontend/src/components/home/ValueProps.jsx',
+    '../../frontend/src/components/common/WhatsAppButton.jsx',
   ];
   for (const relPath of clientFilesToCheck) {
     const fileContent = fs.readFileSync(path.join(__dirname, relPath), 'utf8');

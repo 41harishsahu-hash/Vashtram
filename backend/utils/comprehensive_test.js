@@ -44,7 +44,7 @@ const { app, validateProductionConfig } = require('../server');
 const { setMockRazorpayInstance, resetRazorpayInstance } = require('../config/razorpay');
 const { refundPayment, runRefundRetryJob } = require('../services/refundService');
 const { runPaymentRecoveryJob } = require('../services/paymentRecoveryService');
-const { checkDir, distDir } = require('../../scripts/verify-dist');
+const { checkDir, distDir } = require('../../frontend/scripts/verify-dist');
 
 // Models
 const User = require('../models/User');
@@ -1440,7 +1440,7 @@ const runComprehensiveSuite = async () => {
     // =========================================================================
     console.log('\n--- 32. verify:dist Behavior on Clean and Polluted Builds ---');
     const cleanDistViolations = checkDir(distDir);
-    assert(cleanDistViolations.length === 0, 'verify-dist passes on clean client/dist bundle');
+    assert(cleanDistViolations.length === 0, 'verify-dist passes on clean frontend/dist bundle');
 
     const badFilePath = path.join(distDir, '_test_polluted.txt');
     fs.writeFileSync(badFilePath, 'This file contains unsplash and placehold.co and localhost');

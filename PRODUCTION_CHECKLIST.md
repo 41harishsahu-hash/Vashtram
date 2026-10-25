@@ -37,12 +37,12 @@ This document provides the mandatory pre-flight verification checklist for relea
 ## 🛠️ 2. Build & Package Verification
 
 - [ ] **No Secrets in Repository**:
-  - `.env` and `server/.env` are in `.gitignore`.
+  - `.env` and `backend/.env` are in `.gitignore`.
   - `.env.example` contains only safe placeholder values.
   - Verified no hardcoded tokens, passwords, or secrets exist in git history or client bundles.
 - [ ] **Fresh Production Build**:
   - `npm run build` executed and succeeded with 0 errors.
-  - `node scripts/verify-dist.js` passed: verified zero forbidden strings (`localhost`, `rzp_test_`, `unsplash`, `placehold.co`) in `client/dist`.
+  - `npm run verify:dist` (`node frontend/scripts/verify-dist.js`) passed: verified zero forbidden strings (`localhost`, `rzp_test_`, `unsplash`, `placehold.co`) in `frontend/dist`.
 - [ ] **No Stale Dist Overriding Source**:
   - Build regenerated cleanly from source code.
 - [ ] **Clean Release ZIP / Container**:

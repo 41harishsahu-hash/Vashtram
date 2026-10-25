@@ -7,6 +7,8 @@ node_modules/
 */node_modules/
 client/node_modules/
 server/node_modules/
+frontend/node_modules/
+backend/node_modules/
 
 # Environment Variables & Secrets (Keep real credentials strictly local)
 .env*
@@ -17,11 +19,16 @@ server/.env*
 !server/.env.example
 client/.env*
 !client/.env.example
+backend/.env*
+!backend/.env.example
+frontend/.env*
+!frontend/.env.example
 
 # Backups, Database Dumps & Exports (Never commit database data or dumps)
 backups/
 */backups/
 server/backups/
+backend/backups/
 dump/
 */dump/
 dumps/
@@ -44,12 +51,15 @@ backup-*.json
 uploads/
 */uploads/
 server/uploads/
+backend/uploads/
 
 # Build Outputs & Generated Artifacts
 dist/
 build/
 release/
+backend/release/
 client/dist/
+frontend/dist/
 
 # Logs & Temporary Files
 *.tmp

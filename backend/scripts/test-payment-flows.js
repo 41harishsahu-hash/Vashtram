@@ -10,8 +10,8 @@
 
 const path = require('path');
 process.env.NODE_PATH = [
-  path.join(__dirname, '../server/node_modules'),
   path.join(__dirname, '../node_modules'),
+  path.join(__dirname, '../../node_modules'),
 ].join(';');
 require('module').Module._initPaths();
 
@@ -25,31 +25,31 @@ const crypto = require('crypto');
 const assert = require('assert');
 const mongoose = require('mongoose');
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
-const { assertSafeTestDatabase } = require('../server/utils/testDbGuard');
+const { assertSafeTestDatabase } = require('../utils/testDbGuard');
 
-const User = require('../server/models/User');
-const Product = require('../server/models/Product');
-const Category = require('../server/models/Category');
-const Order = require('../server/models/Order');
-const PaymentIntent = require('../server/models/PaymentIntent');
-const WebhookEvent = require('../server/models/WebhookEvent');
-const Settings = require('../server/models/Settings');
+const User = require('../models/User');
+const Product = require('../models/Product');
+const Category = require('../models/Category');
+const Order = require('../models/Order');
+const PaymentIntent = require('../models/PaymentIntent');
+const WebhookEvent = require('../models/WebhookEvent');
+const Settings = require('../models/Settings');
 
 const {
   verifyPayment,
   handleWebhook,
   createRazorpayOrder,
   getPaymentStatus,
-} = require('../server/controllers/paymentController');
-const { cancelOrder } = require('../server/controllers/orderController');
-const { runPaymentRecoveryJob, fulfillCapturedIntent } = require('../server/services/paymentRecoveryService');
-const { refundPayment, runRefundRetryJob } = require('../server/services/refundService');
-const { restoreOrderStock } = require('../server/services/stockService');
-const { setMockRazorpayInstance, resetRazorpayInstance } = require('../server/config/razorpay');
-const { register, login, updateProfile } = require('../server/controllers/authController');
-const { ensureDefaultUsers } = require('../server/utils/initUsers');
-const { resetAdminPassword } = require('../server/utils/resetAdminPassword');
-const { verifyIndexes, REQUIRED_INDEXES } = require('../server/utils/verifyIndexes');
+} = require('../controllers/paymentController');
+const { cancelOrder } = require('../controllers/orderController');
+const { runPaymentRecoveryJob, fulfillCapturedIntent } = require('../services/paymentRecoveryService');
+const { refundPayment, runRefundRetryJob } = require('../services/refundService');
+const { restoreOrderStock } = require('../services/stockService');
+const { setMockRazorpayInstance, resetRazorpayInstance } = require('../config/razorpay');
+const { register, login, updateProfile } = require('../controllers/authController');
+const { ensureDefaultUsers } = require('../utils/initUsers');
+const { resetAdminPassword } = require('../utils/resetAdminPassword');
+const { verifyIndexes, REQUIRED_INDEXES } = require('../utils/verifyIndexes');
 
 let replSet = null;
 let testUser = null;
@@ -1867,7 +1867,7 @@ async function runTests() {
 
   // Test 27: Part B Item 13 - Uploads security (magic bytes, fake extension, SVG/HTML/PDF block, production Cloudinary requirement)
   try {
-    const { validateUploadedFile, validateMagicBytes } = require('../server/utils/uploadValidator');
+    const { validateUploadedFile, validateMagicBytes } = require('../utils/uploadValidator');
 
     // 1. Magic bytes validation
     const validJpegHeader = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
@@ -1995,7 +1995,7 @@ async function runTests() {
 
   // Test 28: Part B Item 14 - Rate limiting & Trust Proxy
   try {
-    const { app, resolveTrustProxy, createRateLimiter } = require('../server/server');
+    const { app, resolveTrustProxy, createRateLimiter } = require('../server');
 
     // 1. Verify trust proxy setting
     const trustProxySetting = app.get('trust proxy');
@@ -2082,10 +2082,10 @@ async function runTests() {
   try {
     const fs = require('fs');
     const http = require('http');
-    const jwt = require('../server/node_modules/jsonwebtoken');
-    const { app } = require('../server/server');
+    const jwt = require('../node_modules/jsonwebtoken');
+    const { app } = require('../server');
 
-    const uploadsDir = path.join(__dirname, '../server/uploads');
+    const uploadsDir = path.join(__dirname, '../uploads');
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
@@ -2172,7 +2172,7 @@ async function runTests() {
 
   // Test 30: Part A Item 3 - Login Rate Limiting: Per-Email-Only Limiter protects against distributed attacks
   try {
-    const { loginEmailLimiter } = require('../server/server');
+    const { loginEmailLimiter } = require('../server');
 
     const targetEmail = `bruteforce_target_${Date.now()}@example.com`;
     let hit429OnEmail = false;
@@ -2266,7 +2266,7 @@ async function runTests() {
 
   // Test 31: Part A Item 5 - Checkout Polling Workflow (Pure module unit tests for state transitions)
   try {
-    const { pollPaymentStatusWorkflow } = await import('../client/src/utils/paymentPolling.js');
+    const { pollPaymentStatusWorkflow } = await import('../../frontend/src/utils/paymentPolling.js');
 
     // Sub-test A: 202 processing -> failed transition
     let fetchCountA = 0;
@@ -2330,8 +2330,8 @@ async function runTests() {
   // Test 32: Part A Item 4 - Admin Proxy Diagnostic endpoint verification (with ENABLE_PROXY_DIAGNOSTIC flag)
   try {
     const http = require('http');
-    const jwt = require('../server/node_modules/jsonwebtoken');
-    const { app } = require('../server/server');
+    const jwt = require('../node_modules/jsonwebtoken');
+    const { app } = require('../server');
 
     const diagAdmin = await User.create({
       name: 'Diag Admin',
@@ -2394,9 +2394,13 @@ async function runTests() {
   // Test 33: Release Package Verification - Zero dist and zero packaging placeholder URLs in release/
   try {
     const fs = require('fs');
-    const releasePath = path.join(__dirname, '../release');
+    const releasePath = fs.existsSync(path.join(__dirname, '../release'))
+      ? path.join(__dirname, '../release')
+      : path.join(__dirname, '../../release');
 
-    let distAbsent = !fs.existsSync(path.join(releasePath, 'client', 'dist')) &&
+    let distAbsent =
+      !fs.existsSync(path.join(releasePath, 'frontend', 'dist')) &&
+      !fs.existsSync(path.join(releasePath, 'client', 'dist')) &&
       !fs.existsSync(path.join(releasePath, 'dist'));
 
     let foundPlaceholder = false;
@@ -2437,7 +2441,7 @@ async function runTests() {
 
   // Test 34: Admin Login Rate Limiter Separation & Anti-Lockout Resilience
   try {
-    const { adminLoginLimiter, adminLoginEmailLimiter, loginEmailLimiter } = require('../server/server');
+    const { adminLoginLimiter, adminLoginEmailLimiter, loginEmailLimiter } = require('../server');
 
     const adminEmail = `store_admin_${Date.now()}@vashtram-internal.com`;
     let adminBlocked429 = false;
@@ -2513,10 +2517,10 @@ async function runTests() {
 
   // Test 35: Item 15 - Session Revocation (Password Change, Deactivation, Logout) with Live DB
   try {
-    const User = require('../server/models/User');
-    const { protect } = require('../server/middleware/authMiddleware');
-    const { logout } = require('../server/controllers/authController');
-    const jwt = require(path.join(__dirname, '../server/node_modules/jsonwebtoken'));
+    const User = require('../models/User');
+    const { protect } = require('../middleware/authMiddleware');
+    const { logout } = require('../controllers/authController');
+    const jwt = require(path.join(__dirname, '../node_modules/jsonwebtoken'));
     const secret = process.env.JWT_SECRET;
 
     // Create active customer
@@ -2596,8 +2600,8 @@ async function runTests() {
 
   // Test 36: Item 16 - Cart Sync & Server Price Authority on Live MongoDB
   try {
-    const Product = require('../server/models/Product');
-    const { calculateOrderPricing } = require('../server/controllers/paymentController');
+    const Product = require('../models/Product');
+    const { calculateOrderPricing } = require('../controllers/paymentController');
 
     // Create product in test DB
     const testProd = await Product.create({
@@ -2649,8 +2653,8 @@ async function runTests() {
 
   // Test 37: Item 18 - Financial Reconciliation on Live MongoDB Aggregation Pipeline
   try {
-    const Order = require('../server/models/Order');
-    const { calculateOrderNetRevenue, getRevenueAggregationExpr } = require('../server/utils/financialMetrics');
+    const Order = require('../models/Order');
+    const { calculateOrderNetRevenue, getRevenueAggregationExpr } = require('../utils/financialMetrics');
 
     const reconPrefix = `REC_${Date.now()}`;
     const ordersToSeed = [

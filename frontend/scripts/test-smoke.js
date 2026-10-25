@@ -59,14 +59,15 @@ async function runSmokeTest() {
   if (isDevRunning) {
     console.log(`✓ Detected running frontend dev server at ${targetUrl}`);
   } else {
-    // If not running, start client build preview or dev
-    console.log('ℹ️ Port 5173 not active. Checking client/dist for preview...');
-    const distPath = path.resolve(__dirname, '../client/dist');
+    // If not running, start frontend build preview or dev
+    console.log('ℹ️ Port 5173 not active. Checking frontend/dist for preview...');
+    const distPath = path.resolve(__dirname, '../dist');
+    const frontendDir = path.resolve(__dirname, '..');
     if (!fs.existsSync(distPath)) {
-      console.log('Building client for smoke test...');
+      console.log('Building frontend for smoke test...');
       const { execSync } = require('child_process');
       execSync('npm.cmd run build', {
-        cwd: path.resolve(__dirname, '../client'),
+        cwd: frontendDir,
         env: { ...process.env, VITE_SITE_URL: 'https://vastram.in' },
         stdio: 'inherit',
       });
@@ -75,7 +76,8 @@ async function runSmokeTest() {
     targetUrl = 'http://localhost:4173';
     console.log(`Starting Vite preview on ${targetUrl}...`);
     serverProcess = spawn('npx.cmd', ['vite', 'preview', '--port', '4173', '--strictPort'], {
-      cwd: path.resolve(__dirname, '../client'),
+      cwd: frontendDir,
+      env: { ...process.env, VITE_SITE_URL: 'https://vastram.in' },
       stdio: 'pipe',
       shell: true,
     });
@@ -202,16 +204,25 @@ async function runSmokeTest() {
   } finally {
     await browser.close();
     if (serverProcess) {
-      serverProcess.kill();
+      try {
+        if (process.platform === 'win32' && serverProcess.pid) {
+          const { execSync } = require('child_process');
+          execSync(`taskkill /pid ${serverProcess.pid} /T /F`, { stdio: 'ignore' });
+        } else {
+          serverProcess.kill();
+        }
+      } catch {}
     }
   }
 }
 
 if (require.main === module) {
-  runSmokeTest().catch((err) => {
-    console.error('\n❌ SMOKE TEST FAILED:', err.message);
-    process.exit(1);
-  });
+  runSmokeTest()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('\n❌ SMOKE TEST FAILED:', err.message);
+      process.exit(1);
+    });
 }
 
 module.exports = { runSmokeTest };

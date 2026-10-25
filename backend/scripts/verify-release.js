@@ -17,8 +17,8 @@ const crypto = require('crypto');
 const os = require('os');
 const { packageRelease } = require('./package-release');
 
-const ROOT_DIR = path.resolve(__dirname, '..');
-const RELEASE_DIR = path.join(ROOT_DIR, 'release');
+const ROOT_DIR = path.resolve(__dirname, '../..');
+const RELEASE_DIR = path.join(ROOT_DIR, 'backend', 'release');
 
 function computeFileHash(filePath) {
   const fileBuffer = fs.readFileSync(filePath);

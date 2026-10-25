@@ -14,7 +14,12 @@
     "migrate:indexes": "node utils/migrations/001_fix_razorpay_indexes.js",
     "migrate:intents": "node utils/migrations/002_backfill_intent_payment_ids.js",
     "verify:indexes": "node utils/verifyIndexes.js",
-    "test": "node utils/comprehensive_test.js"
+    "test": "node utils/comprehensive_test.js",
+    "test:payments": "node scripts/test-payment-flows.js",
+    "test:bugs": "node scripts/test-bug-fixes.js",
+    "verify:syntax": "node scripts/verify-syntax.js",
+    "package:release": "node scripts/package-release.js",
+    "verify:release": "node scripts/verify-release.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

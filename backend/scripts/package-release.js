@@ -17,8 +17,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT_DIR = path.resolve(__dirname, '..');
-const DEFAULT_RELEASE_DIR = path.join(ROOT_DIR, 'release');
+const ROOT_DIR = path.resolve(__dirname, '../..');
+const DEFAULT_RELEASE_DIR = path.join(ROOT_DIR, 'backend', 'release');
 
 const EXCLUDED_DIRS = new Set([
   'node_modules',
@@ -175,8 +175,12 @@ function verifyReleaseIntegrity(dir) {
 
   walk(dir);
 
-  if (fs.existsSync(path.join(dir, 'client', 'dist')) || fs.existsSync(path.join(dir, 'dist'))) {
-    violations.push(`Built output directory (client/dist) must never ship inside release`);
+  if (
+    fs.existsSync(path.join(dir, 'frontend', 'dist')) ||
+    fs.existsSync(path.join(dir, 'client', 'dist')) ||
+    fs.existsSync(path.join(dir, 'dist'))
+  ) {
+    violations.push(`Built output directory (frontend/dist) must never ship inside release`);
   }
 
   if (violations.length > 0) {
@@ -194,8 +198,8 @@ function packageRelease(targetDir = DEFAULT_RELEASE_DIR, options = {}) {
   log('📦 VASHTRAM — PACKAGING PRODUCTION RELEASE DISTRIBUTION');
   log('======================================================\n');
 
-  log('[1/4] Running client/dist verification...');
-  const { runVerification } = require('./verify-dist');
+  log('[1/4] Running dist verification...');
+  const { runVerification } = require('../../frontend/scripts/verify-dist');
   runVerification();
 
   log(`[2/4] Preparing output directory: ${targetDir}...`);

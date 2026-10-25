@@ -396,8 +396,10 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(xml);
 });
 
-// Serve built client SPA if dist folder exists, otherwise redirect in dev
-const clientDistPath = path.join(__dirname, '../client/dist');
+// Serve built frontend SPA if dist folder exists, otherwise redirect in dev
+const clientDistPath = fs.existsSync(path.join(__dirname, '../frontend/dist'))
+  ? path.join(__dirname, '../frontend/dist')
+  : path.join(__dirname, '../client/dist');
 const renderIndexHtml = (req) => {
   const indexPath = path.join(clientDistPath, 'index.html');
   if (!fs.existsSync(indexPath)) return null;

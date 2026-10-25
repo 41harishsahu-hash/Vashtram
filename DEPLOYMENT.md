@@ -5,7 +5,7 @@ This document outlines the step-by-step procedure for deploying the **VASHTRAM M
 ---
 
 > [!IMPORTANT]
-> **Single Source of Truth Notice**: The `release/` folder is strictly machine-generated from the main source repository (`client/`, `server/`, `scripts/`) using `npm run package:release`. It must **never** be manually edited. CI/CD checks (`npm run verify:release`) verify release consistency by SHA-256 hash comparison against fresh builds.
+> **Single Source of Truth Notice**: The `release/` folder is strictly machine-generated from the main source repository (`frontend/`, `backend/`) using `npm run package:release`. It must **never** be manually edited. CI/CD checks (`npm run verify:release`) verify release consistency by SHA-256 hash comparison against fresh builds.
 
 ---
 
@@ -279,7 +279,7 @@ In the event that administrator credentials are lost or need emergency rotation:
    ```bash
    npm run admin:reset-password admin@yourdomain.com
    # Or directly:
-   node server/utils/resetAdminPassword.js admin@yourdomain.com
+   node backend/utils/resetAdminPassword.js admin@yourdomain.com
    ```
 3. When prompted, type the new administrator password (keystrokes are hidden and not echoed to terminal) and confirm it.
 4. **Automated/CI Execution**:
@@ -295,12 +295,12 @@ In the event that administrator credentials are lost or need emergency rotation:
 
 ## 11. Frontend Deployment
 
-* **Root Directory**: `client`
+* **Root Directory**: `frontend` (formerly `client` — update in Vercel / Netlify dashboard settings)
 * **Build Command**: `npm run build` (requires `VITE_SITE_URL=https://<your-domain>`)
 * **Output Directory**: `dist`
 * **SPA Routing & Security Headers**:
-  - Netlify: `client/public/_headers` provides CSP and frame guards.
-  - Vercel: `client/vercel.json` provides route rewrites and security headers.
+  - Netlify: `frontend/public/_headers` provides CSP and frame guards.
+  - Vercel: `frontend/vercel.json` provides route rewrites and security headers.
 
 ---
 

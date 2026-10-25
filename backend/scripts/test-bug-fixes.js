@@ -1,6 +1,12 @@
 const assert = require("assert");
 const crypto = require("crypto");
-const { assertSafeTestDatabase } = require("../server/utils/testDbGuard");
+const path = require("path");
+process.env.NODE_PATH = [
+  path.join(__dirname, "../node_modules"),
+  path.join(__dirname, "../../node_modules"),
+].join(";");
+require("module").Module._initPaths();
+const { assertSafeTestDatabase } = require("../utils/testDbGuard");
 
 // Production DB Guard check: If a database URI is set in environment for testing, verify it is safe
 if (process.env.MONGODB_TEST_URI || process.env.MONGODB_URI_TEST) {
@@ -72,16 +78,16 @@ test("Non-password update preserves tokenVersion", () => { assert.strictEqual(si
 
 // BUG 4: Portable jsonwebtoken require path
 section("Bug 4: Portable jsonwebtoken Module Resolution");
-test("jsonwebtoken resolves via standard require", () => { const jwt = require("../server/node_modules/jsonwebtoken"); assert.ok(typeof jwt.sign === "function"); });
+test("jsonwebtoken resolves via standard require", () => { const jwt = require("../node_modules/jsonwebtoken"); assert.ok(typeof jwt.sign === "function"); });
 test("JWT sign/verify round-trip", () => {
-  const jwt = require("../server/node_modules/jsonwebtoken");
+  const jwt = require("../node_modules/jsonwebtoken");
   const s = "test_secret_for_unit_test_only_must_be_32chars_at_least";
   const t = jwt.sign({ id: "u1", tokenVersion: 1 }, s, { expiresIn: "1h" });
   const d = jwt.verify(t, s);
   assert.strictEqual(d.id, "u1"); assert.strictEqual(d.tokenVersion, 1);
 });
 test("Tampered token throws", () => {
-  const jwt = require("../server/node_modules/jsonwebtoken");
+  const jwt = require("../node_modules/jsonwebtoken");
   const s = "test_secret_for_unit_test_only_must_be_32chars_at_least";
   const t = jwt.sign({ id: "u1" }, s, { expiresIn: "1h" });
   let threw = false; try { jwt.verify(t + "x", s); } catch { threw = true; }
@@ -218,7 +224,7 @@ test("Accepts localhost / 127.0.0.1 isolated test URI", () => {
 });
 
 // Item 7: Password Security Policy
-const { validatePasswordPolicy } = require("../server/utils/passwordPolicy");
+const { validatePasswordPolicy } = require("../utils/passwordPolicy");
 section("Item 7: Password Security Policy");
 test("Rejects password under 8 characters", () => {
   const res = validatePasswordPolicy("Abc12");
@@ -285,7 +291,7 @@ test("Fallback allowed only when dev mode AND ALLOW_LOCAL_DB_FALLBACK=true", () 
 });
 
 // Item 10: Production Index Verification
-const { REQUIRED_INDEXES } = require("../server/utils/verifyIndexes");
+const { REQUIRED_INDEXES } = require("../utils/verifyIndexes");
 section("Item 10: Production Index Verification");
 test("REQUIRED_INDEXES contains all critical indexes", () => {
   const descriptions = REQUIRED_INDEXES.map((idx) => idx.description);
@@ -318,7 +324,7 @@ test("Policy rejects weak ADMIN_PASSWORD in production", () => {
   assert.strictEqual(res.valid, false);
 });
 test("resetAdminPassword CLI module exports resetAdminPassword function", () => {
-  const { resetAdminPassword } = require("../server/utils/resetAdminPassword");
+  const { resetAdminPassword } = require("../utils/resetAdminPassword");
   assert.strictEqual(typeof resetAdminPassword, "function");
 });
 
@@ -327,7 +333,7 @@ section("Part A Item 1: Client Password Trimming Lint Check");
 test("client/src forms do not call .trim() on password inputs", () => {
   const fs = require("fs");
   const path = require("path");
-  const clientSrcDir = path.join(__dirname, "..", "client", "src");
+  const clientSrcDir = path.join(__dirname, "..", "..", "frontend", "src");
 
   function scanDir(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -356,7 +362,7 @@ test("client/src forms do not call .trim() on password inputs", () => {
 // Part A.2: Legacy 6-character Login Allowed
 section("Part A Item 2: Legacy 6-Character Password Login Allowed");
 test("User with legacy 6-character password is NOT blocked by login", () => {
-  const bcrypt = require("../server/node_modules/bcryptjs");
+  const bcrypt = require("../node_modules/bcryptjs");
   const legacyPass = "abcdef";
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(legacyPass, salt);
@@ -373,7 +379,7 @@ test("User with legacy 6-character password is NOT blocked by login", () => {
 // Part A.3: resetAdminPassword CLI argument protection & policy enforcement
 section("Part A Item 3: Admin Password Reset Security & Policy");
 test("Weak password is rejected by resetAdminPassword policy", async () => {
-  const { resetAdminPassword } = require("../server/utils/resetAdminPassword");
+  const { resetAdminPassword } = require("../utils/resetAdminPassword");
   let threw = false;
   try {
     await resetAdminPassword("admin@test.com", "weak", { ownConnection: false });
@@ -387,7 +393,7 @@ test("Weak password is rejected by resetAdminPassword policy", async () => {
 // Part A.4: Duplicate Detection Pre-flight in syncIndexes
 section("Part A Item 4: syncIndexes Duplicate Pre-Flight Detection");
 test("checkDuplicates function detects duplicate records cleanly", async () => {
-  const { checkDuplicates } = require("../server/utils/syncIndexes");
+  const { checkDuplicates } = require("../utils/syncIndexes");
   assert.strictEqual(typeof checkDuplicates, "function");
 });
 
@@ -418,27 +424,27 @@ test("Client decision table for resilient payment polling states", () => {
 // Part B Item 13: Uploads Hardening
 section("Part B Item 13: Uploads Magic Bytes & File Restrictions");
 test("Magic-byte validator verifies genuine JPEG header", () => {
-  const { validateMagicBytes } = require("../server/utils/uploadValidator");
+  const { validateMagicBytes } = require("../utils/uploadValidator");
   const jpegHeader = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
   const res = validateMagicBytes(jpegHeader);
   assert.strictEqual(res.valid, true);
   assert.strictEqual(res.detectedType, "image/jpeg");
 });
 test("Magic-byte validator verifies genuine PNG header", () => {
-  const { validateMagicBytes } = require("../server/utils/uploadValidator");
+  const { validateMagicBytes } = require("../utils/uploadValidator");
   const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]);
   const res = validateMagicBytes(pngHeader);
   assert.strictEqual(res.valid, true);
   assert.strictEqual(res.detectedType, "image/png");
 });
 test("Magic-byte validator rejects fake extension (Windows executable renamed .jpg)", () => {
-  const { validateMagicBytes } = require("../server/utils/uploadValidator");
+  const { validateMagicBytes } = require("../utils/uploadValidator");
   const exeHeader = Buffer.from("MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00", "binary");
   const res = validateMagicBytes(exeHeader);
   assert.strictEqual(res.valid, false);
 });
 test("validateUploadedFile blocks SVG, HTML, PDF and oversized files", () => {
-  const { validateUploadedFile } = require("../server/utils/uploadValidator");
+  const { validateUploadedFile } = require("../utils/uploadValidator");
 
   // SVG blocked
   let svgBlocked = false;
@@ -465,12 +471,12 @@ test("validateUploadedFile blocks SVG, HTML, PDF and oversized files", () => {
 // Part B Item 14: Rate Limiting & Trust Proxy
 section("Part B Item 14: Rate Limiting & Trust Proxy Configuration");
 test("resolveTrustProxy defaults to 1 hop for reverse proxy deployments", () => {
-  const { resolveTrustProxy } = require("../server/server");
+  const { resolveTrustProxy } = require("../server");
   const hop = resolveTrustProxy();
   assert.strictEqual(hop, 1);
 });
 test("createRateLimiter produces 429 with Retry-After header on exceeding limit", async () => {
-  const { createRateLimiter } = require("../server/server");
+  const { createRateLimiter } = require("../server");
   const limiter = createRateLimiter({
     windowMs: 60000,
     max: 2,
@@ -515,18 +521,18 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   const fs = require('fs');
   const path = require('path');
   const http = require('http');
-  const jwt = require('../server/node_modules/jsonwebtoken');
-  const { app, loginEmailLimiter, resolveTrustProxy } = require('../server/server');
+  const jwt = require('../node_modules/jsonwebtoken');
+  const { app, loginEmailLimiter, resolveTrustProxy } = require('../server');
 
   // Follow-up Item 1: Uploads Auth & Zero File Written
   await (async () => {
-    const uploadsDir = path.join(__dirname, '../server/uploads');
+    const uploadsDir = path.join(__dirname, '../uploads');
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
     const initialFiles = fs.readdirSync(uploadsDir);
 
-    const { protect, admin } = require('../server/middleware/authMiddleware');
-    const uploadRoutes = require('../server/routes/uploadRoutes');
-    const aboutRoutes = require('../server/routes/aboutRoutes');
+    const { protect, admin } = require('../middleware/authMiddleware');
+    const uploadRoutes = require('../routes/uploadRoutes');
+    const aboutRoutes = require('../routes/aboutRoutes');
 
     try {
       // 1. Unauthenticated request to protect -> returns 401
@@ -668,7 +674,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Follow-up Item 5: Checkout Polling Pure Module
   await (async () => {
     try {
-      const { pollPaymentStatusWorkflow } = await import('../client/src/utils/paymentPolling.js');
+      const { pollPaymentStatusWorkflow } = await import('../../frontend/src/utils/paymentPolling.js');
 
       // 1. 202 processing -> failed transition
       let countA = 0;
@@ -721,9 +727,14 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Extra Check 1: Zero Packaging Placeholders & Built Dist in release/
   await (async () => {
     try {
-      const releasePath = path.join(__dirname, '../release');
-      const distPresent = fs.existsSync(path.join(releasePath, 'client', 'dist')) || fs.existsSync(path.join(releasePath, 'dist'));
-      assert.strictEqual(distPresent, false, 'Built client/dist must not ship in release/');
+      const releasePath = fs.existsSync(path.join(__dirname, '../release'))
+        ? path.join(__dirname, '../release')
+        : path.join(__dirname, '../../release');
+      const distPresent =
+        fs.existsSync(path.join(releasePath, 'frontend', 'dist')) ||
+        fs.existsSync(path.join(releasePath, 'client', 'dist')) ||
+        fs.existsSync(path.join(releasePath, 'dist'));
+      assert.strictEqual(distPresent, false, 'Built frontend/dist must not ship in release/');
 
       let foundPlaceholder = false;
       let matchedFile = null;
@@ -757,7 +768,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Extra Check 2: Proxy Diagnostic Behind ENABLE_PROXY_DIAGNOSTIC=true
   await (async () => {
     try {
-      const adminRoutes = require('../server/routes/adminRoutes');
+      const adminRoutes = require('../routes/adminRoutes');
       // Simulate GET /proxy-diagnostic when ENABLE_PROXY_DIAGNOSTIC is false
       delete process.env.ENABLE_PROXY_DIAGNOSTIC;
       const diagLayer = adminRoutes.stack.find((l) => l.route && l.route.path === '/proxy-diagnostic');
@@ -796,7 +807,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Extra Check 3: Admin Login Limiter Separation & Shorter Lockout Window
   await (async () => {
     try {
-      const { adminLoginLimiter, adminLoginEmailLimiter, loginLimiter, loginEmailLimiter } = require('../server/server');
+      const { adminLoginLimiter, adminLoginEmailLimiter, loginLimiter, loginEmailLimiter } = require('../server');
       assert.ok(adminLoginLimiter, 'adminLoginLimiter must be exported');
       assert.ok(adminLoginEmailLimiter, 'adminLoginEmailLimiter must be exported');
       assert.notStrictEqual(adminLoginLimiter, loginLimiter, 'adminLoginLimiter must be distinct from customer loginLimiter');
@@ -814,7 +825,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Pre-Check: Admin Proxy Diagnostic Auth Sequence (Auth runs BEFORE flag check)
   await (async () => {
     try {
-      const adminRoutes = require('../server/routes/adminRoutes');
+      const adminRoutes = require('../routes/adminRoutes');
       // Look at adminRoutes middleware stack order
       const protectIdx = adminRoutes.stack.findIndex((l) => l.handle && l.handle.name === 'protect');
       const diagIdx = adminRoutes.stack.findIndex((l) => l.route && l.route.path === '/proxy-diagnostic');
@@ -822,7 +833,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
       assert.ok(diagIdx > protectIdx, '/proxy-diagnostic must be mounted after protect middleware');
 
       // An unauthenticated request to /proxy-diagnostic triggers protect (returns 401, never sees 404)
-      const { protect } = require('../server/middleware/authMiddleware');
+      const { protect } = require('../middleware/authMiddleware');
       let authStatus = null;
       let authBody = null;
       const mockRes = {
@@ -845,7 +856,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Item 15: Token Rotation, Session Revocation, Deactivation & Logout
   await (async () => {
     try {
-      const jwt = require(path.join(__dirname, '../server/node_modules/jsonwebtoken'));
+      const jwt = require(path.join(__dirname, '../node_modules/jsonwebtoken'));
       const secret = process.env.JWT_SECRET || 'test_jwt_secret_for_unit_tests_32chars_min!';
       process.env.JWT_SECRET = secret;
 
@@ -860,8 +871,8 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
         tokenVersion: 1,
       };
 
-      const { protect } = require('../server/middleware/authMiddleware');
-      const User = require('../server/models/User');
+      const { protect } = require('../middleware/authMiddleware');
+      const User = require('../models/User');
       const origFindById = User.findById;
 
       User.findById = () => ({
@@ -898,7 +909,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
       assert.strictEqual(statusDeactivated, 403, 'Deactivated user token must be rejected with 403');
 
       // Test logout revokes token server-side
-      const { logout } = require('../server/controllers/authController');
+      const { logout } = require('../controllers/authController');
       let savedUser = null;
       User.findById = () => Promise.resolve({
         _id: 'user_123',
@@ -927,9 +938,9 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Item 16: Cart Sync With Live Product, Price and Stock
   await (async () => {
     try {
-      const { calculateOrderPricing } = require('../server/controllers/paymentController');
-      const Product = require('../server/models/Product');
-      const Settings = require('../server/models/Settings');
+      const { calculateOrderPricing } = require('../controllers/paymentController');
+      const Product = require('../models/Product');
+      const Settings = require('../models/Settings');
       const origFindById = Product.findById;
       const origGetSingleton = Settings.getSingleton;
 
@@ -988,8 +999,8 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Item 17: Contact / Inquiry Sanitization, Honeypot, Spam Links & Rate Limiting
   await (async () => {
     try {
-      const { createInquiry } = require('../server/controllers/inquiryController');
-      const Inquiry = require('../server/models/Inquiry');
+      const { createInquiry } = require('../controllers/inquiryController');
+      const Inquiry = require('../models/Inquiry');
       const origCreate = Inquiry.create;
 
       let createdDoc = null;
@@ -1055,7 +1066,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Item 18: Admin Dashboard Financial Totals & Reconciliation
   await (async () => {
     try {
-      const { calculateOrderNetRevenue, getRevenueAggregationExpr } = require('../server/utils/financialMetrics');
+      const { calculateOrderNetRevenue, getRevenueAggregationExpr } = require('../utils/financialMetrics');
       assert.ok(typeof calculateOrderNetRevenue === 'function', 'calculateOrderNetRevenue must be exported');
       assert.ok(typeof getRevenueAggregationExpr === 'function', 'getRevenueAggregationExpr must be exported');
 
@@ -1103,7 +1114,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
       assert.strictEqual(sumMonthly, expectedRevenue, 'Sum of monthly series must equal dashboard total revenue');
 
       // Verify adminController.js calculates monthlySeries using getRevenueAggregationExpr
-      const adminCode = fs.readFileSync(path.join(__dirname, '../server/controllers/adminController.js'), 'utf8');
+      const adminCode = fs.readFileSync(path.join(__dirname, '../controllers/adminController.js'), 'utf8');
       assert.ok(adminCode.includes('monthlySeries = await Order.aggregate'), 'adminController must compute monthlySeries');
       assert.ok(adminCode.includes('getRevenueAggregationExpr()'), 'monthlySeries must use getRevenueAggregationExpr()');
 
@@ -1120,13 +1131,13 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   await (async () => {
     try {
       // 1. Verify ErrorBoundary file exists and exports valid React component
-      const errorBoundaryFile = fs.readFileSync(path.join(__dirname, '../client/src/components/common/ErrorBoundary.jsx'), 'utf8');
+      const errorBoundaryFile = fs.readFileSync(path.join(__dirname, '../../frontend/src/components/common/ErrorBoundary.jsx'), 'utf8');
       assert.ok(errorBoundaryFile.includes('class ErrorBoundary'), 'ErrorBoundary must be defined');
       assert.ok(errorBoundaryFile.includes('getDerivedStateFromError'), 'ErrorBoundary must catch errors');
       assert.ok(errorBoundaryFile.includes('Something went wrong'), 'ErrorBoundary must display friendly message');
 
       // 2. Verify api.js interceptor rules
-      const apiFile = fs.readFileSync(path.join(__dirname, '../client/src/services/api.js'), 'utf8');
+      const apiFile = fs.readFileSync(path.join(__dirname, '../../frontend/src/services/api.js'), 'utf8');
       assert.ok(apiFile.includes("config.method.toLowerCase() === 'get'"), 'Retry must be strictly restricted to GET requests');
       assert.ok(apiFile.includes('timeout: 15000'), 'Default request timeout must be configured');
       assert.ok(apiFile.includes('storage.clearAuth()'), '401 interceptor must clear auth state');
@@ -1136,7 +1147,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
       assert.ok(apiFile.includes('status >= 500'), '500 must return friendly service unavailable message');
 
       // 3. Verify LoginPage handles sessionExpired banner
-      const loginFile = fs.readFileSync(path.join(__dirname, '../client/src/pages/LoginPage.jsx'), 'utf8');
+      const loginFile = fs.readFileSync(path.join(__dirname, '../../frontend/src/pages/LoginPage.jsx'), 'utf8');
       assert.ok(loginFile.includes('sessionExpired'), 'LoginPage must check sessionExpired parameter');
       assert.ok(loginFile.includes('Your session has expired'), 'LoginPage must display session expired message');
 
@@ -1152,7 +1163,7 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Part A Follow-Up 1: Open Redirect Protection
   await (async () => {
     try {
-      const { sanitizeRedirectUrl } = await import('../client/src/utils/urlHelper.js');
+      const { sanitizeRedirectUrl } = await import('../../frontend/src/utils/urlHelper.js');
       assert.strictEqual(typeof sanitizeRedirectUrl, 'function', 'sanitizeRedirectUrl must be exported');
 
       // Test attack vectors:
@@ -1172,10 +1183,10 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
       assert.strictEqual(sanitizeRedirectUrl('https://evil.com', '/admin'), '/admin', 'Return custom fallback /admin on invalid url');
 
       // Check LoginPage.jsx and AdminLoginPage.jsx use sanitizeRedirectUrl
-      const loginCode = fs.readFileSync(path.join(__dirname, '../client/src/pages/LoginPage.jsx'), 'utf8');
+      const loginCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/pages/LoginPage.jsx'), 'utf8');
       assert.ok(loginCode.includes('sanitizeRedirectUrl'), 'LoginPage.jsx must use sanitizeRedirectUrl');
 
-      const adminLoginCode = fs.readFileSync(path.join(__dirname, '../client/src/pages/admin/AdminLoginPage.jsx'), 'utf8');
+      const adminLoginCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/pages/admin/AdminLoginPage.jsx'), 'utf8');
       assert.ok(adminLoginCode.includes('sanitizeRedirectUrl'), 'AdminLoginPage.jsx must use sanitizeRedirectUrl');
 
       console.log("  OK  Part A Item 1: Open redirect protection - only internal single-slash paths allowed");
@@ -1190,11 +1201,11 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Part A Follow-Up 2: 401 Interceptor Login/Register Exception
   await (async () => {
     try {
-      const { isAuthEntrypoint } = await import('../client/src/utils/authHelper.js');
+      const { isAuthEntrypoint } = await import('../../frontend/src/utils/authHelper.js');
       assert.strictEqual(typeof isAuthEntrypoint, 'function', 'isAuthEntrypoint must be exported from authHelper.js');
 
       // Check api.js imports and exports isAuthEntrypoint
-      const apiCode = fs.readFileSync(path.join(__dirname, '../client/src/services/api.js'), 'utf8');
+      const apiCode = fs.readFileSync(path.join(__dirname, '../../frontend/src/services/api.js'), 'utf8');
       assert.ok(apiCode.includes('isAuthEntrypoint'), 'api.js must import and use isAuthEntrypoint');
       assert.ok(apiCode.includes('export { isAuthEntrypoint }'), 'api.js must export isAuthEntrypoint');
 
@@ -1224,13 +1235,13 @@ section("Part A Follow-up Items: Uploads Auth, Email Rate Limit, Polling Resilie
   // Part B Item 20: Responsive UI, Layering, and Accessibility Checks
   await (async () => {
     try {
-      const indexCss = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'index.css'), 'utf8');
-      const whatsappBtn = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'components', 'common', 'WhatsAppButton.jsx'), 'utf8');
-      const checkoutPage = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'pages', 'CheckoutPage.jsx'), 'utf8');
-      const adminOrders = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'pages', 'admin', 'AdminOrders.jsx'), 'utf8');
-      const adminProducts = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'pages', 'admin', 'AdminProducts.jsx'), 'utf8');
-      const adminCustomers = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'pages', 'admin', 'AdminCustomers.jsx'), 'utf8');
-      const adminInquiries = fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'pages', 'admin', 'AdminInquiries.jsx'), 'utf8');
+      const indexCss = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'index.css'), 'utf8');
+      const whatsappBtn = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'components', 'common', 'WhatsAppButton.jsx'), 'utf8');
+      const checkoutPage = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'pages', 'CheckoutPage.jsx'), 'utf8');
+      const adminOrders = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'pages', 'admin', 'AdminOrders.jsx'), 'utf8');
+      const adminProducts = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'pages', 'admin', 'AdminProducts.jsx'), 'utf8');
+      const adminCustomers = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'pages', 'admin', 'AdminCustomers.jsx'), 'utf8');
+      const adminInquiries = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'src', 'pages', 'admin', 'AdminInquiries.jsx'), 'utf8');
 
       // 1. iOS Auto-zoom prevention: inputs must be >= 16px font-size
       assert.ok(indexCss.includes('font-size: 16px !important'), 'index.css must enforce >= 16px font on inputs to prevent iOS auto-zoom');

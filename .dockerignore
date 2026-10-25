@@ -37,9 +37,11 @@ backup-*.json
 uploads/
 */uploads/
 server/uploads/
+backend/uploads/
 
 # Build artifacts
 release/
+backend/release/
 .git/
 .vscode/
 .idea/

@@ -3,9 +3,9 @@
  * 
  * Generates a clean source-only zip archive strictly excluding:
  * - node_modules
- * - client/dist, build/
+ * - frontend/dist, client/dist, build/
  * - release/
- * - server/uploads and user uploads
+ * - backend/uploads, server/uploads and user uploads
  * - any .env files (except .env.example templates)
  * - backups, dumps, *.bak, *.sql, backup-*.json
  * - existing *.zip, *.tar, archive files
@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const ROOT_DIR = path.resolve(__dirname, '..');
+const ROOT_DIR = path.resolve(__dirname, '../..');
 const ZIP_NAME = 'vashtram-source.zip';
 const ZIP_PATH = path.join(ROOT_DIR, ZIP_NAME);
 

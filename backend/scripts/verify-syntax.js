@@ -7,7 +7,7 @@ function checkDir(dir) {
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name !== 'node_modules' && entry.name !== '.git' && entry.name !== 'dist') {
+      if (entry.name !== 'node_modules' && entry.name !== '.git' && entry.name !== 'dist' && entry.name !== 'release') {
         checkDir(full);
       }
     } else if (entry.isFile() && (entry.name.endsWith('.js') || entry.name.endsWith('.cjs') || entry.name.endsWith('.mjs'))) {
@@ -21,8 +21,12 @@ function checkDir(dir) {
   }
 }
 
-console.log('Checking server files syntax...');
-checkDir(path.resolve(__dirname, '../server'));
-console.log('Checking scripts syntax...');
-checkDir(path.resolve(__dirname, '../scripts'));
+const backendDir = path.resolve(__dirname, '..');
+console.log('Checking backend files syntax...');
+checkDir(backendDir);
+console.log('Checking frontend scripts syntax...');
+const frontendScriptsDir = path.resolve(__dirname, '../../frontend/scripts');
+if (fs.existsSync(frontendScriptsDir)) {
+  checkDir(frontendScriptsDir);
+}
 console.log('All JavaScript files syntax valid!');

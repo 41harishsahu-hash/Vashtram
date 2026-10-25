@@ -5,7 +5,7 @@ A production-ready, full-stack e-commerce web application for **VASHTRAM**, an a
 ---
 
 > [!IMPORTANT]
-> **Release Directory Notice**: The `release/` folder is strictly machine-generated from the main source tree (`client/`, `server/`, `scripts/`) via `npm run package:release`. It must **never** be edited by hand. All changes, bug fixes, and configuration updates must be made in `main`. Cryptographic verification (`npm run verify:release`) enforces that `release/` matches the generator output with 100% SHA-256 accuracy.
+> **Release Directory Notice**: The `release/` folder is strictly machine-generated from the main source tree (`frontend/`, `backend/`) via `npm run package:release`. It must **never** be edited by hand. All changes, bug fixes, and configuration updates must be made in `main`. Cryptographic verification (`npm run verify:release`) enforces that `release/` matches the generator output with 100% SHA-256 accuracy.
 
 ---
 
@@ -50,10 +50,10 @@ A production-ready, full-stack e-commerce web application for **VASHTRAM**, an a
 ---
 
 ## 📁 Project Architecture
-
+ 
 ```
 vashtram/
-├── client/                     # React Frontend Application (Vite)
+├── frontend/                   # React Frontend Application (Vite)
 │   ├── src/
 │   │   ├── components/         # Navbar, Footer, ProductCard, Toast, ProtectedRoute, Home sections
 │   │   ├── context/            # useAuth, useCart, useTheme, useSettings & Context definitions
@@ -62,24 +62,26 @@ vashtram/
 │   │   ├── utils/              # imageUrl, sizeHelper, validationHelper
 │   │   └── index.css           # VASHTRAM luxury design system & theme tokens
 │   ├── public/                 # Static assets, local image fallbacks, _headers (Netlify CSP)
+│   ├── scripts/                # Frontend smoke test (test-smoke.js) & build verification (verify-dist.js)
 │   ├── vercel.json             # Vercel SPA routing & CSP security headers
 │   ├── vite.config.js          # Build-time __SITE_URL__ injection plugin
 │   └── package.json
 │
-├── server/                     # Node.js / Express Backend API
+├── backend/                    # Node.js / Express Backend API
 │   ├── config/                 # db.js, razorpay.js, cloudinary.js, validateConfig.js
 │   ├── controllers/            # auth, product, category, order, admin, payment controllers
 │   ├── middleware/             # authMiddleware, errorMiddleware, uploadValidator
 │   ├── models/                 # User, Product, Category, Order, PaymentIntent, WebhookEvent
 │   ├── routes/                 # Express API routes & uploadRoutes
+│   ├── scripts/                # Backend test suites, release packaging, logic/syntax checks
 │   ├── services/               # refundService (shared race-safe refunds), paymentRecoveryService
 │   ├── utils/                  # migrations, verifyIndexes, cleanupDemoAccounts, verifyNoDemoAccounts
 │   ├── server.js               # Express application entry point (Helmet, Rate Limiter, CORS)
 │   └── package.json
 │
-├── scripts/                    # Release packaging, verify-dist, verify-syntax, zip-source
 ├── DEPLOYMENT.md               # Step-by-step production deployment & Atlas/Cloudinary guide
-└── package.json                # Cross-platform orchestration scripts
+├── PRODUCTION_CHECKLIST.md     # Production release verification checklist
+└── package.json                # Cross-platform root orchestration scripts
 ```
 
 ---
@@ -94,14 +96,14 @@ vashtram/
 Run from the project root:
 ```bash
 npm install
-npm --prefix server install
-npm --prefix client install
+npm --prefix backend install
+npm --prefix frontend install
 ```
 
 ### 3. Environment Variables
-Create `.env` in `server/` and `client/` based on the example templates:
+Create `.env` in `backend/` and `frontend/` based on the example templates:
 
-**`server/.env`**:
+**`backend/.env`**:
 ```env
 NODE_ENV=development
 PORT=5000
@@ -119,7 +121,7 @@ RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
 ```
 
-**`client/.env`**:
+**`frontend/.env`**:
 ```env
 # Relative /api for production reverse proxy, or empty in development
 VITE_API_URL=/api
