@@ -28,7 +28,8 @@
     "verify:syntax": "node backend/scripts/verify-syntax.js",
     "verify:release": "node backend/scripts/verify-release.js",
     "zip:source": "node backend/scripts/zip-source.js",
-    "optimize:images": "npm --prefix frontend run optimize:images"
+    "optimize:images": "npm --prefix frontend run optimize:images",
+    "postinstall": "npm --prefix backend install"
   },
   "keywords": [
     "ecommerce",
