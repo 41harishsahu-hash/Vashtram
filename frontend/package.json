@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "verify:dist": "node scripts/verify-dist.js",
-    "test:smoke": "node scripts/test-smoke.js"
+    "test:smoke": "node scripts/test-smoke.js",
+    "optimize:images": "node scripts/optimize-images.cjs"
   },
   "dependencies": {
     "axios": "^1.20.0",
@@ -23,6 +24,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "sharp": "^0.35.5",
     "vite": "^8.3.0"
   }
 }
