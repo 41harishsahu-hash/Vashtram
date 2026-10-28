@@ -27,7 +27,8 @@
     "verify:logic": "node backend/scripts/verify-logic.js",
     "verify:syntax": "node backend/scripts/verify-syntax.js",
     "verify:release": "node backend/scripts/verify-release.js",
-    "zip:source": "node backend/scripts/zip-source.js"
+    "zip:source": "node backend/scripts/zip-source.js",
+    "optimize:images": "npm --prefix frontend run optimize:images"
   },
   "keywords": [
     "ecommerce",
