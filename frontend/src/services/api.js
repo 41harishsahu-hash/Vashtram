@@ -34,12 +34,20 @@ export const setOnUnauthorizedCallback = (callback) => {
 
 export { isAuthEntrypoint };
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token and omit Content-Type on bodyless GET/HEAD requests
 api.interceptors.request.use(
   (config) => {
     const token = storage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Omit Content-Type on GET/HEAD without payload to allow simple CORS requests without preflight
+    const method = (config.method || 'get').toLowerCase();
+    if (['get', 'head'].includes(method) && !config.data) {
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+      }
     }
     return config;
   },

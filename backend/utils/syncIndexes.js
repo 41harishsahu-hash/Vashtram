@@ -133,6 +133,13 @@ async function syncIndexes({ checkOnly = false } = {}) {
     console.log('Syncing products indexes...');
     await productsCol.createIndex({ slug: 1 }, { unique: true, background: true });
     await productsCol.createIndex({ sku: 1 }, { unique: true, background: true });
+    await productsCol.createIndex({ category: 1, isActive: 1 }, { background: true });
+    await productsCol.createIndex({ isFeatured: 1, isActive: 1, rating: -1, createdAt: -1 }, { background: true });
+
+    // 6. Categories collection indexes
+    const categoriesCol = db.collection('categories');
+    console.log('Syncing categories indexes...');
+    await categoriesCol.createIndex({ isActive: 1, order: 1, name: 1 }, { background: true });
 
     console.log('\nVerifying synced indexes...');
     const verification = await verifyIndexes({ warnOnly: true });

@@ -27,30 +27,38 @@ const slugify = (text) => {
 const getCategories = async (req, res, next) => {
   try {
     const filter = req.query.all === 'true' ? {} : { isActive: true };
-    const categories = await Category.find(filter).sort({ order: 1, name: 1 });
 
-    // Attach product count to each category and ensure images array
-    const categoriesWithCount = await Promise.all(
-      categories.map(async (cat) => {
-        const count = await Product.countDocuments({
-          category: cat._id,
-          isActive: true,
-        });
-        const obj = cat.toObject();
-        const images =
-          Array.isArray(obj.images) && obj.images.length > 0
-            ? obj.images
-            : obj.image
-              ? [obj.image]
-              : [];
-        return {
-          ...obj,
-          images,
-          image: images[0] || obj.image || '',
-          productCount: count,
-        };
-      })
-    );
+    const [categories, productCounts] = await Promise.all([
+      Category.find(filter).sort({ order: 1, name: 1 }).lean(),
+      Product.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: '$category', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const countMap = new Map();
+    for (const item of productCounts) {
+      if (item._id) {
+        countMap.set(item._id.toString(), item.count);
+      }
+    }
+
+    const categoriesWithCount = categories.map((cat) => {
+      const catId = cat._id ? cat._id.toString() : '';
+      const count = countMap.get(catId) || 0;
+      const images =
+        Array.isArray(cat.images) && cat.images.length > 0
+          ? cat.images
+          : cat.image
+            ? [cat.image]
+            : [];
+      return {
+        ...cat,
+        images,
+        image: images[0] || cat.image || '',
+        productCount: count,
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -71,9 +79,9 @@ const getCategory = async (req, res, next) => {
     let category;
 
     if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
-      category = await Category.findById(identifier);
+      category = await Category.findById(identifier).lean();
     } else {
-      category = await Category.findOne({ slug: identifier.toLowerCase() });
+      category = await Category.findOne({ slug: identifier.toLowerCase() }).lean();
     }
 
     if (!category) {
@@ -88,20 +96,19 @@ const getCategory = async (req, res, next) => {
       isActive: true,
     });
 
-    const obj = category.toObject();
     const images =
-      Array.isArray(obj.images) && obj.images.length > 0
-        ? obj.images
-        : obj.image
-          ? [obj.image]
+      Array.isArray(category.images) && category.images.length > 0
+        ? category.images
+        : category.image
+          ? [category.image]
           : [];
 
     res.status(200).json({
       success: true,
       category: {
-        ...obj,
+        ...category,
         images,
-        image: images[0] || obj.image || '',
+        image: images[0] || category.image || '',
         productCount,
       },
     });

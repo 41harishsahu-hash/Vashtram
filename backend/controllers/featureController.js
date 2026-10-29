@@ -6,14 +6,17 @@ const { DEFAULT_FEATURES, ensureDefaultFeatures } = require('../utils/initFeatur
 // @access  Public
 const getFeatures = async (req, res, next) => {
   try {
-    // If no features exist yet, auto-seed defaults
-    const totalCount = await Feature.countDocuments();
-    if (totalCount === 0) {
-      await ensureDefaultFeatures();
-    }
-
     const filter = req.query.all === 'true' ? {} : { isActive: true };
-    const features = await Feature.find(filter).sort({ displayOrder: 1, createdAt: 1 });
+    let features = await Feature.find(filter).sort({ displayOrder: 1, createdAt: 1 }).lean();
+
+    // If no features exist yet, auto-seed defaults only when empty
+    if (features.length === 0 && req.query.all !== 'true') {
+      const totalCount = await Feature.countDocuments();
+      if (totalCount === 0) {
+        await ensureDefaultFeatures();
+        features = await Feature.find(filter).sort({ displayOrder: 1, createdAt: 1 }).lean();
+      }
+    }
 
     res.status(200).json({
       success: true,

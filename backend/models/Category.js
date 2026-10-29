@@ -60,4 +60,7 @@ categorySchema.pre('save', function (next) {
   next();
 });
 
+// Performance index for active category listings
+categorySchema.index({ isActive: 1, order: 1, name: 1 });
+
 module.exports = mongoose.model('Category', categorySchema);

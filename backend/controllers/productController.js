@@ -207,7 +207,8 @@ const getFeaturedProducts = async (req, res, next) => {
     const products = await Product.find({ isFeatured: true, isActive: true })
       .populate('category', 'name slug')
       .limit(8)
-      .sort({ rating: -1, createdAt: -1 });
+      .sort({ rating: -1, createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       success: true,

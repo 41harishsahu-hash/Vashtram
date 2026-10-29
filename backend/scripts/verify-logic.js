@@ -514,12 +514,16 @@ Settings.getSingleton = async () => ({
 
   // 12. ATOMIC STOCK RESTORATION BUG FIX
   console.log('\n--- 12. Atomic Stock Restoration Concurrency Guard ---');
+  const stockServiceCode = fs.readFileSync(path.join(__dirname, '../services/stockService.js'), 'utf8');
   const orderCtrlCode = fs.readFileSync(path.join(__dirname, '../controllers/orderController.js'), 'utf8');
   const adminCtrlCode = fs.readFileSync(path.join(__dirname, '../controllers/adminController.js'), 'utf8');
-  assert(orderCtrlCode.includes('Order.findOneAndUpdate'), 'orderController.js uses Order.findOneAndUpdate for atomic claim');
-  assert(orderCtrlCode.includes('stockRestored: false'), 'orderController.js checks stockRestored: false in atomic filter');
-  assert(adminCtrlCode.includes('Order.findOneAndUpdate'), 'adminController.js uses Order.findOneAndUpdate for atomic claim');
-  assert(adminCtrlCode.includes('stockRestored: false'), 'adminController.js checks stockRestored: false in atomic filter');
+
+  assert(stockServiceCode.includes('Order.findOneAndUpdate'), 'stockService.js uses Order.findOneAndUpdate for atomic claim');
+  assert(stockServiceCode.includes('stockRestored: false'), 'stockService.js checks stockRestored: false in atomic filter');
+  assert(stockServiceCode.includes('startTransaction'), 'stockService.js uses multi-document transactions for atomic restoration');
+  assert(stockServiceCode.includes('$inc: { stock: quantity }'), 'stockService.js increments inventory atomically using $inc');
+  assert(orderCtrlCode.includes('restoreOrderStock'), 'orderController.js delegates cancellation stock restoration to stockService');
+  assert(adminCtrlCode.includes('restoreOrderStock'), 'adminController.js delegates cancellation stock restoration to stockService');
 
   // 13. DYNAMIC CONTACT DETAILS (FOOTER & CONTACT PAGE)
   console.log('\n--- 13. Dynamic Contact Details via useSettings ---');
@@ -530,24 +534,69 @@ Settings.getSingleton = async () => ({
   assert(contactPageCode.includes('{address}'), 'ContactPage.jsx renders address dynamically');
   assert(contactPageCode.includes('{email}'), 'ContactPage.jsx renders email dynamically');
 
-  // 14. HARDCODED TEXT & MATTRESS PROTECTOR CLEAN-UP
-  console.log('\n--- 14. Mattress Protector Global Text Sweep ---');
-  const clientFilesToCheck = [
-    '../../frontend/src/components/common/Navbar.jsx',
-    '../../frontend/src/components/common/Footer.jsx',
-    '../../frontend/src/pages/ShopPage.jsx',
-    '../../frontend/src/pages/OrdersPage.jsx',
-    '../../frontend/src/pages/CheckoutPage.jsx',
-    '../../frontend/src/pages/CategoriesPage.jsx',
-    '../../frontend/src/pages/AboutPage.jsx',
-    '../../frontend/src/components/home/BannerPromo.jsx',
-    '../../frontend/src/components/home/WhyChooseUs.jsx',
-    '../../frontend/src/components/home/ValueProps.jsx',
-    '../../frontend/src/components/common/WhatsAppButton.jsx',
+  // 14. MATTRESS PROTECTOR INTENDED BRANDING & CATEGORY VERIFICATION
+  console.log('\n--- 14. Mattress Protector Category & Branding Verification ---');
+  const brandingChecks = [
+    {
+      path: '../../frontend/src/components/common/Navbar.jsx',
+      pattern: /all\s+mattress\s+protectors/i,
+      desc: 'Navbar.jsx features Mattress Protector navigation link',
+    },
+    {
+      path: '../../frontend/src/components/common/Footer.jsx',
+      pattern: /mattress\s+protectors/i,
+      desc: 'Footer.jsx references VASHTRAM Mattress Protectors branding',
+    },
+    {
+      path: '../../frontend/src/pages/ShopPage.jsx',
+      pattern: /all\s+mattress\s+protectors/i,
+      desc: 'ShopPage.jsx displays Mattress Protector catalog heading',
+    },
+    {
+      path: '../../frontend/src/pages/OrdersPage.jsx',
+      pattern: /mattress\s+protector\s+collection/i,
+      desc: 'OrdersPage.jsx links to Mattress Protector collection',
+    },
+    {
+      path: '../../frontend/src/pages/CheckoutPage.jsx',
+      pattern: /mattress\s+protectors\s+&\s+home\s+textiles/i,
+      desc: 'CheckoutPage.jsx specifies Mattress Protectors & Home Textiles',
+    },
+    {
+      path: '../../frontend/src/pages/CategoriesPage.jsx',
+      pattern: /mattress\s+protectors\s+&\s+home\s+collections/i,
+      desc: 'CategoriesPage.jsx displays Mattress Protectors & Home Collections',
+    },
+    {
+      path: '../../frontend/src/pages/AboutPage.jsx',
+      pattern: /waterproof\s+mattress\s+protectors/i,
+      desc: 'AboutPage.jsx highlights Waterproof Mattress Protectors craft',
+    },
+    {
+      path: '../../frontend/src/components/home/BannerPromo.jsx',
+      pattern: /premium\s+mattress\s+protectors/i,
+      desc: 'BannerPromo.jsx features Premium Mattress Protectors banner',
+    },
+    {
+      path: '../../frontend/src/components/home/WhyChooseUs.jsx',
+      pattern: /vashtram\s+mattress\s+protectors/i,
+      desc: 'WhyChooseUs.jsx emphasizes VASHTRAM Mattress Protectors value',
+    },
+    {
+      path: '../../frontend/src/components/home/ValueProps.jsx',
+      pattern: /100%\s+waterproof/i,
+      desc: 'ValueProps.jsx highlights 100% Waterproof protector value proposition',
+    },
+    {
+      path: '../../frontend/src/components/common/WhatsAppButton.jsx',
+      pattern: /order\s+for\s+mattress\s+protectors/i,
+      desc: 'WhatsAppButton.jsx specifies Mattress Protectors bulk order inquiries',
+    },
   ];
-  for (const relPath of clientFilesToCheck) {
-    const fileContent = fs.readFileSync(path.join(__dirname, relPath), 'utf8');
-    assert(!/mattress\s+protector/i.test(fileContent), `${path.basename(relPath)} has zero references to Mattress Protector`);
+
+  for (const check of brandingChecks) {
+    const fileContent = fs.readFileSync(path.join(__dirname, check.path), 'utf8');
+    assert(check.pattern.test(fileContent), check.desc);
   }
 
   // Restore mocks

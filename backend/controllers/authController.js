@@ -198,7 +198,13 @@ const adminLogin = async (req, res, next) => {
 // @access  Private
 const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
     res.status(200).json({
       success: true,
       user: {

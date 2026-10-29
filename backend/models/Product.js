@@ -175,4 +175,8 @@ productSchema.set('toObject', { virtuals: true });
 // Text index for search
 productSchema.index({ name: 'text', description: 'text', material: 'text', pattern: 'text' });
 
+// Performance indexes for storefront queries
+productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ isFeatured: 1, isActive: 1, rating: -1, createdAt: -1 });
+
 module.exports = mongoose.model('Product', productSchema);
